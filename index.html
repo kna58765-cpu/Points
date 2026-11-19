@@ -87,5 +87,5 @@ window.change=(id,sign)=>{if(!requireAdmin())return;target=id;mode=sign>0?'point
 const editMember=id=>{let m=data.members.find(x=>x.id===id);if(!m)return;openModal('edit',id)};
 window.editMember=editMember;
 render();
-if('serviceWorker' in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
+if(!window.Capacitor?.isNativePlatform?.()&&'serviceWorker' in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
 </script></body></html>
