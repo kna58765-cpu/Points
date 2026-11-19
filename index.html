@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#111111"><meta name="description" content="POINTS 多人积分管理">
+<link rel="manifest" href="./manifest.json"><title>POINTS · 积分管理</title>
+<style>
+:root{color-scheme:light;--ink:#111;--muted:#858585;--line:#e9e9e9;--paper:#f6f6f6;--white:#fff}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+button,input{font:inherit}button{cursor:pointer}.app{max-width:1100px;margin:auto;min-height:100dvh;padding:24px 24px 100px}
+header{display:flex;align-items:center;justify-content:space-between;padding:10px 0 28px}.brand{font-size:22px;font-weight:900;letter-spacing:3px}.brand span{font-weight:400;color:#999}.team{font-size:13px;color:#666;border:1px solid #ddd;border-radius:30px;padding:9px 13px;background:#fff}
+h1{font-size:clamp(28px,5vw,42px);letter-spacing:-1.8px;margin:12px 0 6px}.sub{color:var(--muted);font-size:14px}.hero{background:#111;color:#fff;border-radius:22px;padding:27px 28px;margin:25px 0 22px;display:flex;align-items:end;justify-content:space-between;gap:16px}.hero small{color:#aaa;letter-spacing:1px}.total{font-size:clamp(40px,8vw,64px);font-weight:750;letter-spacing:-2px;margin-top:8px}.hero-note{font-size:12px;color:#aaa;text-align:right}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:28px}.stat,.panel{background:#fff;border:1px solid var(--line);border-radius:17px;padding:18px}.stat label{font-size:12px;color:#888}.stat strong{display:block;font-size:25px;margin-top:8px}
+.section-head{display:flex;justify-content:space-between;align-items:center;margin:26px 0 13px}.section-head h2{font-size:18px;margin:0}.plain{background:#111;color:#fff;border:0;border-radius:10px;padding:11px 15px;font-weight:650}.outline{background:#fff;color:#111;border:1px solid #ddd;border-radius:10px;padding:10px 13px}
+.members{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}.member{background:#fff;border:1px solid var(--line);border-radius:16px;padding:17px}.member-top{display:flex;justify-content:space-between;align-items:center}.avatar{width:38px;height:38px;background:#111;color:#fff;border-radius:12px;display:grid;place-items:center;font-weight:700}.member-name{font-weight:700;margin-left:10px;flex:1}.points{font-size:26px;font-weight:750;margin:18px 0 13px}.actions{display:flex;gap:8px}.actions button{flex:1;border:1px solid #e4e4e4;background:#fafafa;border-radius:9px;padding:9px}.actions .plus{background:#111;color:#fff;border-color:#111}
+.panel{padding:0;overflow:hidden}.rowline{display:flex;align-items:center;justify-content:space-between;padding:15px 18px;border-bottom:1px solid #eee;gap:12px}.rowline:last-child{border:0}.muted{font-size:12px;color:#888;margin-top:4px}.delta{font-weight:750}.positive{color:#111}.negative{color:#888}
+nav{position:fixed;bottom:0;left:0;right:0;background:rgba(255,255,255,.94);backdrop-filter:blur(16px);border-top:1px solid #e8e8e8;display:flex;justify-content:center;gap:clamp(20px,8vw,90px);padding:13px 10px calc(13px + env(safe-area-inset-bottom));z-index:5}nav button{border:0;background:none;color:#888;font-size:12px;padding:3px 8px}nav button.active{color:#111;font-weight:800}
+.modal-bg{position:fixed;inset:0;background:#0008;display:none;align-items:end;justify-content:center;z-index:10;padding:16px}.modal-bg.show{display:flex}.modal{background:#fff;border-radius:22px;padding:23px;width:min(100%,440px);margin-bottom:env(safe-area-inset-bottom)}.modal h3{margin:0 0 18px;font-size:20px}.field{width:100%;padding:13px;border:1px solid #ddd;border-radius:10px;margin:7px 0 13px;outline:none}.field:focus{border-color:#111}.modal-actions{display:flex;gap:9px;margin-top:12px}.modal-actions button{flex:1;padding:13px}
+.empty{padding:28px;text-align:center;color:#999;font-size:13px}.hide{display:none!important}
+@media(min-width:700px){.modal-bg{align-items:center}.hero{padding:34px}.stat{padding:22px}}
+</style></head>
+<body><main class="app">
+<header><div class="brand">POINTS<span> / SCORE</span></div><div class="team" id="teamLabel">我的团队 · 本地模式</div></header>
+<div><div class="sub">OVERVIEW / 总览</div><h1>让每一分，都有迹可循。</h1><div class="sub">简单、公平、清晰的团队积分管理。</div></div>
+<section class="hero"><div><small>TEAM TOTAL POINTS</small><div class="total" id="total">0</div></div><div class="hero-note">团队总积分<br>持续记录每一次进步</div></section>
+<section class="stats"><div class="stat"><label>成员人数</label><strong id="memberCount">0</strong></div><div class="stat"><label>累计加分</label><strong id="earned">0</strong></div><div class="stat"><label>累计扣分</label><strong id="spent">0</strong></div></section>
+<div class="section-head"><h2>成员积分</h2><button class="plain" id="addMember">＋ 添加成员</button></div><section class="members" id="members"></section>
+<div class="section-head"><h2>最近记录</h2><span class="sub">POINT HISTORY</span></div><section class="panel" id="history"></section>
+</main>
+<nav><button class="active">◉ 总览</button><button onclick="document.getElementById('members').scrollIntoView({behavior:'smooth'})">♙ 成员</button><button onclick="document.getElementById('history').scrollIntoView({behavior:'smooth'})">≡ 流水</button></nav>
+<div class="modal-bg" id="modal"><div class="modal"><h3 id="modalTitle">添加成员</h3><label class="sub">成员名称</label><input class="field" id="nameInput" maxlength="24" placeholder="输入成员名称"><label class="sub" id="amountLabel">积分数值</label><input class="field" id="amountInput" type="number" min="1" max="99999" placeholder="例如 10"><div class="modal-actions"><button class="outline" id="cancel">取消</button><button class="plain" id="confirm">确认</button></div></div></div>
+<script>
+const KEY='points-v1';let data=JSON.parse(localStorage.getItem(KEY)||'null')||{members:[],logs:[]};let mode='member',target=null;
+const $=id=>document.getElementById(id);const save=()=>{localStorage.setItem(KEY,JSON.stringify(data));render()};
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function render(){let total=data.members.reduce((s,m)=>s+m.points,0);$('total').textContent=total.toLocaleString();$('memberCount').textContent=data.members.length;$('earned').textContent=data.logs.filter(x=>x.delta>0).reduce((s,x)=>s+x.delta,0).toLocaleString();$('spent').textContent=Math.abs(data.logs.filter(x=>x.delta<0).reduce((s,x)=>s+x.delta,0)).toLocaleString();
+$('members').innerHTML=data.members.length?data.members.slice().sort((a,b)=>b.points-a.points).map((m,i)=>'<article class="member"><div class="member-top"><div class="avatar">'+(i+1)+'</div><div class="member-name">'+esc(m.name)+'</div><button class="outline" onclick="editMember(\''+m.id+'\')">•••</button></div><div class="points">'+m.points.toLocaleString()+' <span class="sub">PTS</span></div><div class="actions"><button onclick="change(\''+m.id+'\',-1)">− 扣分</button><button class="plus" onclick="change(\''+m.id+'\',1)">＋ 加分</button></div></article>').join(''):'<div class="panel empty">还没有成员，添加第一位成员开始吧。</div>';
+$('history').innerHTML=data.logs.length?data.logs.slice(0,12).map(x=>'<div class="rowline"><div><b>'+esc(x.name)+'</b><div class="muted">'+new Date(x.time).toLocaleString()+'</div></div><div class="delta '+(x.delta>0?'positive':'negative')+'">'+(x.delta>0?'+':'')+x.delta+'</div></div>').join(''):'<div class="empty">暂无积分记录</div>'}
+function openModal(m,t){mode=m;target=t||null;$('modalTitle').textContent=m==='member'?'添加成员':m==='edit'?'编辑成员':'调整积分';$('nameInput').value=m==='edit'?data.members.find(x=>x.id===t)?.name||'':'';$('nameInput').classList.toggle('hide',m==='points');$('amountLabel').classList.toggle('hide',m==='member'||m==='edit');$('amountInput').classList.toggle('hide',m==='member'||m==='edit');$('amountInput').value='';$('modal').classList.add('show');if(m==='points')$('amountInput').focus();else $('nameInput').focus()}
+function closeModal(){$('modal').classList.remove('show')}
+$('addMember').onclick=()=>openModal('member');$('cancel').onclick=closeModal;
+$('confirm').onclick=()=>{let n=$('nameInput').value.trim(),a=Math.floor(Number($('amountInput').value));if(mode==='member'){if(!n)return alert('请输入成员名称');data.members.push({id:crypto.randomUUID(),name:n,points:0})}else if(mode==='edit'){if(!n)return alert('请输入成员名称');let m=data.members.find(x=>x.id===target);if(m)m.name=n}else{if(!Number.isFinite(a)||a<1||a>99999)return alert('请输入 1 到 99999 的整数');let m=data.members.find(x=>x.id===target);if(m){let d=mode==='points'?a: a;m.points+=d;data.logs.unshift({name:m.name,delta:d,time:Date.now()})}}closeModal();save()};
+window.change=(id,sign)=>{target=id;mode=sign>0?'points':'deduct';$('modalTitle').textContent=sign>0?'增加积分':'扣除积分';$('nameInput').classList.add('hide');$('amountLabel').classList.remove('hide');$('amountInput').classList.remove('hide');$('amountInput').value='';$('modal').classList.add('show');$('confirm').onclick=()=>{let a=Math.floor(Number($('amountInput').value));if(!Number.isFinite(a)||a<1||a>99999)return alert('请输入有效积分');let m=data.members.find(x=>x.id===target);if(mode==='deduct'&&m.points<a)return alert('积分不足，不能扣成负数');let d=mode==='points'?a:-a;m.points+=d;data.logs.unshift({name:m.name,delta:d,time:Date.now()});closeModal();$('confirm').onclick=confirmDefault;save()}}
+function confirmDefault(){$('confirm').onclick=confirmDefault}
+const editMember=id=>{let m=data.members.find(x=>x.id===id);if(!m)return;openModal('edit',id)};
+window.editMember=editMember;
+render();
+if('serviceWorker' in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
+</script></body></html>
