@@ -14,7 +14,7 @@ for (const [density, size] of Object.entries(densities)) {
 }
 const adaptiveDir = `${root}/mipmap-anydpi-v26`;
 await mkdir(adaptiveDir, { recursive: true });
-const adaptive = name => `<?xml version="1.0" encoding="utf-8"?>\\n<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">\\n    <background android:drawable="@android:color/black" />\\n    <foreground android:drawable="@mipmap/ic_launcher_foreground" />\\n</adaptive-icon>\\n`;
+const adaptive = name => `<?xml version="1.0" encoding="utf-8"?>\n<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">\n    <background android:drawable="@android:color/black" />\n    <foreground android:drawable="@mipmap/ic_launcher_foreground" />\n</adaptive-icon>\n`;
 await writeFile(`${adaptiveDir}/ic_launcher.xml`, adaptive('ic_launcher'));
 await writeFile(`${adaptiveDir}/ic_launcher_round.xml`, adaptive('ic_launcher_round'));
 console.log('Generated Pis launcher icons for all Android densities.');
