@@ -48,6 +48,20 @@ jobs:
       - name: Generate Pis app icons
         run: node scripts/generate-android-icons.mjs
 
+      - name: Set Android app version
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          p = Path('android/app/build.gradle')
+          s = p.read_text()
+          s, code_count = re.subn(r'versionCode\\s+\\d+', 'versionCode 20261100', s, count=1)
+          s, name_count = re.subn(r'versionName\\s+[\'\"][^\'\"]+[\'\"]', 'versionName "2026.11.00"', s, count=1)
+          if code_count != 1 or name_count != 1:
+              raise SystemExit('Could not set Android versionCode/versionName')
+          p.write_text(s)
+          PY
+
       - name: Build debug APK
         working-directory: android
         run: ./gradlew assembleDebug --no-daemon
