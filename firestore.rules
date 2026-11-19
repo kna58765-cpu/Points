@@ -16,7 +16,7 @@ service cloud.firestore {
       match /members/{uid} {
         allow read: if member(teamId);
         allow create: if signedIn() && uid == request.auth.uid &&
-          get(/databases/$(database)/documents/teams/$(teamId)).data.ownerUid == request.auth.uid;
+          getAfter(/databases/$(database)/documents/teams/$(teamId)).data.ownerUid == request.auth.uid;
         allow update, delete: if false;
       }
       match /people/{personId} {
