@@ -1,47 +1,58 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
-import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
-import { getFirestore, collection, doc, getDoc, getDocs, setDoc, addDoc, query, orderBy, serverTimestamp, runTransaction } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
-import { firebaseConfig } from "./firebase-config.js";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { supabaseConfig } from "./supabase-config.js";
 
-const configured = firebaseConfig.apiKey !== "YOUR_API_KEY" && firebaseConfig.projectId !== "YOUR_PROJECT_ID";
-let app, auth, db;
-if (configured) { app=initializeApp(firebaseConfig); auth=getAuth(app); db=getFirestore(app); }
+const configured = Boolean(supabaseConfig.url && supabaseConfig.anonKey &&
+  !supabaseConfig.url.includes("YOUR_PROJECT") && !supabaseConfig.anonKey.includes("YOUR_ANON"));
 export const cloudReady = configured;
-export const authState = callback => configured ? onAuthStateChanged(auth, callback) : callback(null);
-export const register = (email,password) => { if(!configured) throw new Error("请先配置 Firebase"); return createUserWithEmailAndPassword(auth,email,password); };
-export const login = (email,password) => { if(!configured) throw new Error("请先配置 Firebase"); return signInWithEmailAndPassword(auth,email,password); };
-export const logout = () => configured ? signOut(auth) : Promise.resolve();
+export const supabase = configured ? createClient(supabaseConfig.url, supabaseConfig.anonKey) : null;
 
+function requireCloud() {
+  if (!configured) throw new Error("云端尚未配置，请先填写 Supabase 项目 URL 和 anon key。");
+  return supabase;
+}
+export const authState = callback => requireCloud().auth.onAuthStateChange((_event, session) => callback(session?.user ?? null));
+export async function register(email,password) {
+  const {data,error}=await requireCloud().auth.signUp({email,password});
+  if(error) throw error;
+  return data;
+}
+export async function login(email,password) {
+  const {data,error}=await requireCloud().auth.signInWithPassword({email,password});
+  if(error) throw error;
+  return data;
+}
+export async function logout() {
+  const {error}=await requireCloud().auth.signOut();
+  if(error) throw error;
+}
 export async function createTeam(name) {
-  if(!configured || !auth.currentUser) throw new Error("请先登录");
-  const teamRef=doc(collection(db,"teams")), uid=auth.currentUser.uid;
-  const memberRef=doc(db,"teams",teamRef.id,"members",uid);
-  await runTransaction(db,async tx=>{
-    tx.set(teamRef,{name:name.trim(),ownerUid:uid,createdAt:serverTimestamp()});
-    tx.set(memberRef,{uid,email:auth.currentUser.email||"",role:"owner",joinedAt:serverTimestamp()});
-  });
-  return teamRef.id;
+  if(!name?.trim()) throw new Error("请输入团队名称");
+  const {data,error}=await requireCloud().rpc("create_team",{team_name:name.trim()});
+  if(error) throw error;
+  return data;
 }
 export async function addScore(teamId,personId,delta,note="") {
-  if(!configured || !auth.currentUser) throw new Error("请先登录");
   if(!Number.isInteger(delta)||delta===0||Math.abs(delta)>99999) throw new Error("积分数值无效");
-  const memberRef=doc(db,"teams",teamId,"members",auth.currentUser.uid);
-  const ledgerRef=doc(collection(db,"teams",teamId,"ledger"));
-  await runTransaction(db,async tx=>{
-    const member=await tx.get(memberRef);
-    if(!member.exists()||!["owner","admin"].includes(member.data().role)) throw new Error("没有积分管理权限");
-    tx.set(ledgerRef,{personId,delta,note:String(note).slice(0,120),actorUid:auth.currentUser.uid,createdAt:serverTimestamp()});
-  });
-  return ledgerRef.id;
+  const {data,error}=await requireCloud().rpc("add_score",{p_team_id:teamId,p_person_id:personId,p_delta:delta,p_note:String(note).slice(0,120)});
+  if(error) throw error;
+  return data;
 }
 export async function readTeam(teamId) {
-  if(!configured || !auth.currentUser) throw new Error("请先登录");
-  const member=await getDoc(doc(db,"teams",teamId,"members",auth.currentUser.uid));
-  if(!member.exists()) throw new Error("你不是这个团队的成员");
-  const [team,people,ledger]=await Promise.all([
-    getDoc(doc(db,"teams",teamId)),
-    getDocs(collection(db,"teams",teamId,"people")),
-    getDocs(query(collection(db,"teams",teamId,"ledger"),orderBy("createdAt","desc")))
+  const client=requireCloud();
+  const [{data:team,error:e1},{data:members,error:e2},{data:people,error:e3},{data:ledger,error:e4}]=await Promise.all([
+    client.from("teams").select("*").eq("id",teamId).single(),
+    client.from("team_members").select("*").eq("team_id",teamId),
+    client.from("people").select("*").eq("team_id",teamId).order("created_at"),
+    client.from("ledger").select("*").eq("team_id",teamId).order("created_at",{ascending:false}).limit(200)
   ]);
-  return {team:team.data(),people:people.docs.map(x=>({id:x.id,...x.data()})),ledger:ledger.docs.map(x=>({id:x.id,...x.data()}))};
+  for(const error of [e1,e2,e3,e4]) if(error) throw error;
+  return {team,members,people,ledger};
+}
+export function watchTeam(teamId,onChange) {
+  const client=requireCloud();
+  const channel=client.channel("points-team-"+teamId)
+    .on("postgres_changes",{event:"*",schema:"public",table:"people",filter:"team_id=eq."+teamId},onChange)
+    .on("postgres_changes",{event:"INSERT",schema:"public",table:"ledger",filter:"team_id=eq."+teamId},onChange)
+    .subscribe();
+  return () => client.removeChannel(channel);
 }
