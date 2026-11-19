@@ -1,7 +1,7 @@
 # POINTS Android 应用构建说明
 
 ## 应用信息
-- 应用版本：`2026.11.00`
+- 应用版本：`2026.11.01`
 - Android application ID：`com.kna58765.points`
 - 显示名称：`POINTS`
 - 构建方式：Capacitor Android 容器，复用当前 POINTS 界面与业务逻辑
