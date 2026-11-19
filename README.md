@@ -1,5 +1,7 @@
 # POINTS
 
+**当前版本：2026.11.00**
+
 Android 可安装版正在搭建。项目已加入 Capacitor Android 构建配置，GitHub Actions 将自动生成测试 APK。当前 APK 先复用现有黑白界面；多人云端积分同步仍在开发中，账号登录目前不等于积分数据已同步。
 
 黑白极简风格的积分管理应用，目标平台 Android + iOS。
