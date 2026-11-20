@@ -4,3 +4,9 @@ android/.gradle/
 android/build/
 android/app/build/
 .DS_Store
+
+# Local Appwrite configuration and secrets
+appwrite-config.js
+.env
+.env.*
+!.env.example
