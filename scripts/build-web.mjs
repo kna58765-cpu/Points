@@ -2,14 +2,14 @@ import { mkdir, copyFile, access } from 'node:fs/promises';
 
 await mkdir('www', { recursive: true });
 
-const files = ['index.html', 'manifest.json', 'sw.js', 'display.html', 'appwrite.js'];
+const files = ['index.html', 'manifest.json', 'sw.js', 'display.html', 'appwrite.js', 'points-cloud.js'];
 for (const file of files) {
   try {
     await access(file);
     await copyFile(file, `www/${file}`);
     console.log(`Copied ${file}`);
   } catch {
-    if (file === 'index.html' || file === 'appwrite.js') {
+    if (file === 'index.html' || file === 'appwrite.js' || file === 'points-cloud.js') {
       throw new Error(`Missing required ${file}`);
     }
     console.log(`Skipped optional ${file}`);
