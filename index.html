@@ -182,10 +182,10 @@ nav button.active{
 
 </style></head>
 <body><main class="app">
-<header><div><div class="brand">POINTS<span> / SCORE</span></div><div class="app-version">T068</div></div><div class="sub">云端接口已接入 · 等待服务端部署</div></header>
+<header><div><div class="brand">POINTS<span> / SCORE</span></div><div class="app-version">T068</div></div><div class="sub">Supabase 云端版 · T069 迁移中</div></header>
 <section class="panel" id="cloudAuth" style="padding:18px;margin:0 0 18px">
   <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
-    <div><b>云端账号</b><div class="muted" id="cloudStatus">尚未登录 · 登录功能接入中</div></div>
+    <div><b>云端账号</b><div class="muted" id="cloudStatus">尚未登录 · 等待 Supabase 项目配置</div></div>
     <button class="outline" id="cloudLogout" type="button" hidden>退出登录</button>
   </div>
   <div id="cloudForm" style="margin-top:14px">
@@ -197,7 +197,7 @@ nav button.active{
       <button class="outline" id="cloudRegister" type="button">注册账号</button>
     </div>
   </div>
-  <div class="muted" id="cloudMessage" role="status" style="margin-top:10px">账号登录与积分云端同步是两个阶段，当前登录成功不代表积分已同步。</div>
+  <div class="muted" id="cloudMessage" role="status" style="margin-top:10px">POINTS 正在从 Appwrite 迁移到 Supabase。账号与积分同步分阶段启用。</div>
 </section>
 <section class="page-view active" data-view="overview">
 <div><div class="sub">OVERVIEW / 总览</div><h1>让每一分，都有迹可循。</h1><div class="sub">简单、公平、清晰的团队积分管理。</div></div>
@@ -276,24 +276,41 @@ const emailEl=document.getElementById('cloudEmail');
 const passwordEl=document.getElementById('cloudPassword');
 let cloudApi=null;
 function showMessage(message,isError=false){messageEl.textContent=message;messageEl.style.color=isError?'#d93636':'#777'}
-function showUser(user){statusEl.textContent=user?('已登录：'+(user.name||user.email)):'尚未登录';formEl.hidden=!!user;logoutEl.hidden=!user}
-function errorText(error){const code=error?.code; if(code===401)return '邮箱或密码不正确，请检查后重试。';if(code===409)return '该邮箱已经注册，请直接登录。';return error?.message||'请求失败，请检查网络后重试。'}
+function showUser(user){statusEl.textContent=user?('已登录：'+(user.user_metadata?.nickname||user.email)):'尚未登录';formEl.hidden=!!user;logoutEl.hidden=!user}
+function errorText(error){
+ const message=String(error?.message||'');
+ if(/Invalid login credentials/i.test(message))return '邮箱或密码不正确，请检查后重试。';
+ if(/User already registered/i.test(message))return '该邮箱已经注册，请直接登录。';
+ if(/Email not confirmed/i.test(message))return '请先打开邮箱中的确认邮件，再回来登录。';
+ return message||'请求失败，请检查网络后重试。';
+}
 try{
- cloudApi=await import('./appwrite.js');
- if(!cloudApi.appwriteReady)throw new Error('Appwrite 项目配置尚未就绪。');
- const user=await cloudApi.currentUser();showUser(user);
- showMessage(user?'账号已连接。积分仍保存在本机，云端同步正在开发。':'可以使用邮箱注册或登录。登录成功后，当前积分仍保存在本机。');
-}catch(error){statusEl.textContent='云端服务暂不可用';showMessage(errorText(error),true)}
+ cloudApi=await import('./supabase-cloud.js');
+ if(!cloudApi.cloudReady)throw new Error('Supabase 项目尚未配置。等待连接云端项目后即可启用。');
+ const user=await cloudApi.currentUser();
+ showUser(user);
+ showMessage(user?'Supabase 账号已连接。积分云端同步仍在接入中。':'可以使用 Supabase 邮箱注册或登录。');
+}catch(error){
+ statusEl.textContent='云端服务待配置';
+ showMessage(errorText(error),true);
+}
 document.getElementById('cloudSignIn').addEventListener('click',async()=>{
- if(!cloudApi)return;const email=emailEl.value.trim(),password=passwordEl.value;
+ if(!cloudApi?.cloudReady)return showMessage('Supabase 云端项目尚未配置。',true);
+ const email=emailEl.value.trim(),password=passwordEl.value;
  if(!email||!password)return showMessage('请填写邮箱和密码。',true);
- try{const session=await cloudApi.login(email,password);const user=await cloudApi.currentUser();showUser(user);showMessage('登录成功。注意：积分尚未同步到云端。');passwordEl.value=''}catch(error){showMessage(errorText(error),true)}
+ try{await cloudApi.login(email,password);const user=await cloudApi.currentUser();showUser(user);showMessage('登录成功。下一阶段将连接团队积分数据。');passwordEl.value=''}
+ catch(error){showMessage(errorText(error),true)}
 });
 document.getElementById('cloudRegister').addEventListener('click',async()=>{
- if(!cloudApi)return;const name=nameEl.value.trim(),email=emailEl.value.trim(),password=passwordEl.value;
+ if(!cloudApi?.cloudReady)return showMessage('Supabase 云端项目尚未配置。',true);
+ const name=nameEl.value.trim(),email=emailEl.value.trim(),password=passwordEl.value;
  if(!name||!email||!password)return showMessage('注册请填写昵称、邮箱和密码。',true);
  if(password.length<8)return showMessage('密码至少需要 8 位。',true);
- try{await cloudApi.register(email,password,name);const user=await cloudApi.currentUser();showUser(user);showMessage('账号注册成功。请注意：积分尚未同步到云端。');passwordEl.value=''}catch(error){showMessage(errorText(error),true)}
+ try{await cloudApi.register(email,password,name);const user=await cloudApi.currentUser();showUser(user);showMessage(user?'账号注册成功。':'注册成功，请检查邮箱确认链接。');passwordEl.value=''}
+ catch(error){showMessage(errorText(error),true)}
 });
-logoutEl.addEventListener('click',async()=>{try{await cloudApi.logout();showUser(null);showMessage('已退出登录。')}catch(error){showMessage(errorText(error),true)}});
+logoutEl.addEventListener('click',async()=>{
+ try{await cloudApi.logout();showUser(null);showMessage('已退出登录。')}
+ catch(error){showMessage(errorText(error),true)}
+});
 </script></body></html>
