@@ -83,6 +83,29 @@ nav button.active{background:#111;color:#fff}
  nav{gap:8px;justify-content:space-around}
  nav button{padding:8px 9px;font-size:11px}
 }
+
+/* T068 refined controls and native-dialog replacement */
+.control-select{position:relative;min-width:128px}
+.control-select>button{width:100%;min-height:48px;padding:0 42px 0 16px;border:1px solid #e4e4e4;border-radius:16px;background:#fff;color:#171717;text-align:left;font-weight:600;position:relative;box-shadow:0 2px 8px #00000006}
+.control-select>button:after{content:"";position:absolute;right:17px;top:50%;width:8px;height:8px;border-right:1.8px solid #777;border-bottom:1.8px solid #777;transform:translateY(-70%) rotate(45deg)}
+.control-select>button:focus-visible,.ui-btn:focus-visible{outline:3px solid #1112;outline-offset:2px}
+.control-menu{position:absolute;right:0;top:calc(100% + 8px);min-width:100%;width:max-content;max-width:min(82vw,320px);background:#fff;border:1px solid #eee;border-radius:18px;padding:6px;box-shadow:0 14px 40px #0002;z-index:30;display:none}
+.control-select.open .control-menu{display:block;animation:menuIn .14s ease}
+@keyframes menuIn{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:translateY(0)}}
+.control-option{width:100%;border:0;background:transparent;color:#222;border-radius:13px;padding:15px 16px;text-align:left;font-size:15px;display:flex;align-items:center;justify-content:space-between;gap:22px}
+.control-option.selected{background:#f4f4f4;font-weight:700}
+.control-option.selected:after{content:"✓";color:#111;font-size:17px}
+.control-option:active{transform:scale(.985);background:#eee}
+.native-select-hidden{position:absolute!important;width:1px!important;height:1px!important;opacity:0!important;pointer-events:none!important;overflow:hidden!important}
+.ui-btn{min-height:44px;border-radius:14px;padding:10px 16px;font-weight:650;letter-spacing:.01em}
+.ui-btn.primary{background:#111;color:#fff;border:1px solid #111}
+.ui-btn.secondary{background:#fff;color:#222;border:1px solid #e5e5e5}
+#bulkAddModal .modal{width:min(100%,520px);padding:24px}
+#bulkNames{min-height:170px;resize:vertical;line-height:1.65}
+#bulkAddModal .modal-actions{margin-top:16px}
+#bulkAddModal .modal-actions button{min-height:48px}
+@media(max-width:600px){.control-select{min-width:118px}.control-select>button{min-height:46px;border-radius:15px;padding-left:14px;font-size:14px}.control-menu{left:0;right:auto;width:100%;max-width:90vw}#bulkAddModal .modal{padding:22px}#bulkNames{min-height:155px}}
+
 </style></head>
 <body><main class="app">
 <header><div><div class="brand">POINTS<span> / SCORE</span></div><div class="app-version">T068</div></div><div class="sub">云端接口已接入 · 等待服务端部署</div></header>
@@ -149,7 +172,27 @@ $('mainNav').addEventListener('click',event=>{
 });
 render();
 if(!window.Capacitor?.isNativePlatform?.()&&'serviceWorker' in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
-</script><script type="module">
+</script>
+<div class="modal-bg" id="bulkAddModal" aria-hidden="true"><div class="modal" role="dialog" aria-modal="true" aria-labelledby="bulkAddTitle"><h3 id="bulkAddTitle">批量添加成员</h3><div class="sub" style="margin-bottom:10px">每行输入一个姓名，重复姓名会自动跳过</div><textarea class="field" id="bulkNames" placeholder="例如：&#10;Omicron&#10;Haval&#10;Delta"></textarea><div class="modal-actions"><button class="ui-btn secondary" id="bulkCancel" type="button">取消</button><button class="ui-btn primary" id="bulkConfirm" type="button">添加成员</button></div></div></div>
+
+<script>
+(function(){
+ const ids=["rankFilter","groupFilter","historyFilter"];
+ function refresh(select,menu){menu.innerHTML=Array.from(select.options).map(o=>'<button type="button" class="control-option '+(o.value===select.value?'selected':'')+'" data-value="'+o.value.replace(/&/g,'&amp;').replace(/"/g,'&quot;')+'">'+o.textContent.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')+'</button>').join("");const label=menu.parentElement.querySelector(".control-current");if(label)label.textContent=select.selectedOptions[0]?.textContent||"";}
+ ids.forEach(id=>{const select=document.getElementById(id);if(!select)return;const wrap=document.createElement("div");wrap.className="control-select";const button=document.createElement("button");button.type="button";button.className="control-current";button.setAttribute("aria-haspopup","listbox");const menu=document.createElement("div");menu.className="control-menu";menu.setAttribute("role","listbox");select.parentNode.insertBefore(wrap,select);wrap.append(button,menu,select);select.classList.add("native-select-hidden");refresh(select,menu);button.addEventListener("click",()=>{document.querySelectorAll(".control-select.open").forEach(x=>{if(x!==wrap)x.classList.remove("open")});wrap.classList.toggle("open");refresh(select,menu)});menu.addEventListener("click",e=>{const option=e.target.closest("[data-value]");if(!option)return;select.value=option.dataset.value;select.dispatchEvent(new Event("change",{bubbles:true}));refresh(select,menu);wrap.classList.remove("open")});select.addEventListener("change",()=>refresh(select,menu));new MutationObserver(()=>refresh(select,menu)).observe(select,{childList:true,subtree:true});});
+ document.addEventListener("click",e=>{if(!e.target.closest(".control-select"))document.querySelectorAll(".control-select.open").forEach(x=>x.classList.remove("open"))});
+ const modal=document.getElementById("bulkAddModal"),area=document.getElementById("bulkNames");
+ const open=()=>{area.value="";modal.classList.add("show");modal.setAttribute("aria-hidden","false");setTimeout(()=>area.focus(),40)};
+ const close=()=>{modal.classList.remove("show");modal.setAttribute("aria-hidden","true")};
+ document.getElementById("bulkAdd").onclick=()=>{if(!requireAdmin())return;open()};
+ document.getElementById("bulkCancel").onclick=close;
+ modal.addEventListener("click",e=>{if(e.target===modal)close()});
+ document.getElementById("bulkConfirm").onclick=()=>{const raw=area.value;if(!raw.trim())return alert("请至少输入一个成员姓名");const names=Array.from(new Set(raw.split(/\r?\n/).map(x=>x.trim()).filter(Boolean))).map(x=>x.slice(0,24));const existing=new Set(data.members.map(m=>m.name));const fresh=names.filter(n=>!existing.has(n));if(!fresh.length)return alert("没有可添加的新成员，姓名可能已存在");fresh.forEach(name=>data.members.push({id:crypto.randomUUID(),name,group:"未分组",points:0,color:"#111111"}));audit("批量添加成员","新增 "+fresh.length+" 位成员");save();close();alert("已添加 "+fresh.length+" 位成员")};
+ document.addEventListener("keydown",e=>{if(e.key==="Escape"){document.querySelectorAll(".control-select.open").forEach(x=>x.classList.remove("open"));if(modal.classList.contains("show"))close()}});
+})();
+</script>
+
+<script type="module">
 const statusEl=document.getElementById('cloudStatus');
 const messageEl=document.getElementById('cloudMessage');
 const formEl=document.getElementById('cloudForm');
