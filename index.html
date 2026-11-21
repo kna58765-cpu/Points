@@ -235,21 +235,15 @@ body.auth-required #authGate{display:flex;position:fixed;inset:0;z-index:100;bac
 @media(max-width:420px){body.auth-required #authGate{padding:22px 16px}#authGate #cloudAuth{padding:21px!important;border-radius:24px}.auth-logo{font-size:52px}}
 
 
-/* T093: bottom-nav anchored elastic update drawer */
-#updateToastBackdrop{position:fixed;inset:0;z-index:79;background:rgba(12,12,12,.18);opacity:0;visibility:hidden;pointer-events:none;transition:opacity .34s ease,visibility .34s}
-#updateToastBackdrop.show{opacity:1;visibility:visible;pointer-events:auto}
-#updateToast{position:fixed;z-index:80;left:0;right:0;bottom:calc(78px + env(safe-area-inset-bottom));width:min(100%,560px);height:min(52dvh,520px);margin:0 auto;padding:22px 22px calc(18px + env(safe-area-inset-bottom));box-sizing:border-box;border:1px solid rgba(255,255,255,.88);border-bottom:0;border-radius:28px 28px 0 0;background:linear-gradient(155deg,rgba(255,255,255,.94),rgba(242,242,242,.88));box-shadow:0 -16px 55px rgba(0,0,0,.16),inset 0 1px 0 #fff;backdrop-filter:blur(30px) saturate(1.35);-webkit-backdrop-filter:blur(30px) saturate(1.35);opacity:0;visibility:hidden;transform:translateY(105%);pointer-events:none;overflow:auto;overscroll-behavior:contain;transition:transform .62s cubic-bezier(.18,.86,.22,1),height .52s cubic-bezier(.18,.86,.22,1),opacity .24s ease,visibility .24s}
-#updateToast.show{visibility:visible;opacity:1;pointer-events:auto;transform:translateY(0)}
-#updateToast.collapsed{height:68px;padding-top:14px;padding-bottom:10px;border-radius:22px 22px 0 0;box-shadow:0 -7px 28px rgba(0,0,0,.13);overflow:hidden;cursor:pointer}
-#updateToast.hide{visibility:hidden;opacity:0;pointer-events:none;transform:translateY(105%)}
-#updateToast:before{content:"";display:block;width:38px;height:4px;border-radius:99px;background:rgba(80,80,80,.24);margin:-8px auto 17px}
-#updateToast.collapsed:before{margin-bottom:9px}
-.update-toast-head{display:flex;align-items:center;gap:11px}.update-toast-check{width:36px;height:36px;display:grid;place-items:center;border-radius:50%;background:#eaf6ef;color:#16834a;font-size:21px;font-weight:900}.update-toast-head>div{display:grid;gap:3px;flex:1}.update-toast-head b{font-size:17px}.update-toast-head small{font-size:11px;color:#888}.update-toast-head button{border:0;background:#f1f1f1;border-radius:50%;width:28px;height:28px;font-size:20px;color:#777}.update-toast-label{font-size:11px;font-weight:800;color:#999;letter-spacing:.8px;margin:18px 0 8px}#updateToastNotes{font-size:13px;line-height:1.7;color:#444;white-space:pre-wrap;max-height:calc(52dvh - 150px);overflow:auto}
-#updateToast.collapsed .update-toast-label,#updateToast.collapsed #updateToastNotes{display:none}
-@media(prefers-reduced-motion:reduce){#updateToast,#updateToastBackdrop{transition:none!important}}
+/* T094: restore compact update toast, lifted above bottom navigation */
+#updateToast{position:fixed;z-index:80;left:50%;bottom:calc(100px + env(safe-area-inset-bottom));width:min(92vw,430px);padding:17px 18px 16px;border:1px solid rgba(255,255,255,.88);border-radius:23px;background:linear-gradient(145deg,rgba(255,255,255,.97),rgba(246,246,246,.94));box-shadow:0 18px 55px rgba(0,0,0,.22),inset 0 1px 0 #fff;backdrop-filter:blur(24px) saturate(1.5);-webkit-backdrop-filter:blur(24px) saturate(1.5);opacity:0;visibility:hidden;transform:translate(-50%,24px) scale(.96);pointer-events:none}
+#updateToast.show{visibility:visible;pointer-events:auto;animation:updateToastIn .48s cubic-bezier(.18,.85,.25,1) forwards}
+#updateToast.hide{animation:updateToastOut .32s ease forwards}
+@keyframes updateToastIn{to{opacity:1;transform:translate(-50%,0) scale(1)}}
+@keyframes updateToastOut{to{opacity:0;transform:translate(-50%,18px) scale(.97)}}
+.update-toast-head{display:flex;align-items:center;gap:11px}.update-toast-check{width:36px;height:36px;display:grid;place-items:center;border-radius:50%;background:#eaf6ef;color:#16834a;font-size:21px;font-weight:900}.update-toast-head>div{display:grid;gap:3px;flex:1}.update-toast-head b{font-size:17px}.update-toast-head small{font-size:11px;color:#888}.update-toast-head button{flex:0 0 32px;position:relative;z-index:2;border:0;background:#f1f1f1;border-radius:50%;width:32px;height:32px;font-size:22px;line-height:1;color:#777;display:grid;place-items:center;pointer-events:auto;touch-action:manipulation}.update-toast-label{font-size:11px;font-weight:800;color:#999;letter-spacing:.8px;margin:13px 0 7px}#updateToastNotes{font-size:13px;line-height:1.65;color:#444;white-space:pre-wrap;max-height:min(34dvh,190px);overflow:auto}
 #accountDelete{font-weight:750}.page-view[data-view="account"] .panel{box-shadow:0 3px 14px #00000004}
 @media(prefers-reduced-motion:reduce){#updateToast.show,#updateToast.hide{animation:none}#updateToast.show{opacity:1;visibility:visible;transform:translate(-50%,0)}}
-
 
 /* T084: roomier layout and true frosted-glass surfaces */
 .app{padding:28px 26px calc(118px + env(safe-area-inset-bottom));}
@@ -454,7 +448,7 @@ nav button.active{transform:translateY(-1px)}
 <section class="page-view" data-view="audit"><div class="section-head"><h2>操作记录</h2><span class="sub">最近 50 条</span></div><section class="panel" id="auditHistory"></section></section>
 </main>
 <nav id="mainNav"><button class="active" type="button" data-page="overview">◉ 总览</button><button type="button" data-page="rank">▤ 排行</button><button type="button" data-page="members">♙ 成员</button><button type="button" data-page="history">≡ 流水</button><button type="button" data-page="audit">≡ 操作</button><button type="button" data-page="account">◎ 账号</button></nav>
-<div id="updateToastBackdrop" aria-hidden="true"></div><aside id="updateToast" aria-live="polite" aria-atomic="true"><div class="update-toast-head"><span class="update-toast-check">✓</span><div><b>更新完成</b><small id="updateToastVersion">POINTS T092 已成功安装</small></div><button type="button" id="updateToastClose" aria-label="关闭">×</button></div><div class="update-toast-label">本次更新内容</div><div id="updateToastNotes"></div></aside>
+<aside id="updateToast" aria-live="polite" aria-atomic="true"><div class="update-toast-head"><span class="update-toast-check">✓</span><div><b>更新完成</b><small id="updateToastVersion">POINTS T092 已成功安装</small></div><button type="button" id="updateToastClose" aria-label="关闭">×</button></div><div class="update-toast-label">本次更新内容</div><div id="updateToastNotes"></div></aside>
 <div class="modal-bg" id="modal"><div class="modal"><h3 id="modalTitle">添加成员</h3><label class="sub">成员名称</label><input class="field" id="nameInput" maxlength="24" placeholder="输入成员名称"><label class="sub" id="groupLabel">所属分组</label><input class="field" id="groupInput" maxlength="20" placeholder="例如：一班、二班、管理员组"><label class="sub hide" id="colorLabel">头像颜色</label><select class="field hide" id="colorInput"><option value="#111111">黑色</option><option value="#555555">深灰</option><option value="#777777">灰色</option><option value="#9a9a9a">浅灰</option><option value="#333333">炭黑</option></select><label class="sub" id="amountLabel">积分数值</label><input class="field" id="amountInput" type="number" min="1" max="99999" placeholder="例如 10"><label class="sub hide" id="noteLabel">备注（选填）</label><input class="field hide" id="noteInput" maxlength="80" placeholder="例如：完成任务、迟到"><div class="modal-actions"><button class="outline" id="deleteMember" style="display:none">删除成员</button><button class="outline" id="cancel">取消</button><button class="plain" id="confirm">确认</button></div></div></div>
 <div class="modal-bg" id="detailModal"><div class="modal" style="max-height:85dvh;overflow:auto"><div style="display:flex;justify-content:space-between"><h3 id="detailName">成员详情</h3><button class="outline" id="closeDetail">关闭</button></div><div class="hero" style="margin:8px 0 14px;padding:20px"><div><small>MEMBER TOTAL POINTS</small><div class="total" id="detailPoints">0</div></div></div><div class="stats"><div class="stat"><label>累计加分</label><strong id="detailEarned">0</strong></div><div class="stat"><label>累计扣分</label><strong id="detailSpent">0</strong></div><div class="stat"><label>记录次数</label><strong id="detailCount">0</strong></div></div><div class="section-head"><h2>全部积分记录</h2></div><section class="panel" id="detailHistory"></section></div></div><script>
 const KEY='points-v1';let data=JSON.parse(localStorage.getItem(KEY)||'null')||{members:[],logs:[]};data.settings=Object.assign({maxAdd:99999,maxDeduct:99999},data.settings||{});data.audit=Array.isArray(data.audit)?data.audit:[];let mode='member',target=null;let adminMode=true;
@@ -720,21 +714,19 @@ document.getElementById('cloudRegister').addEventListener('click',async()=>{
 });
 
 function showUpdateToast(info){
- const toast=document.getElementById('updateToast'),backdrop=document.getElementById('updateToastBackdrop');
- if(!toast||!backdrop)return;
- const notes=String(info.notes||'').trim().split(/\r?\n/).filter(Boolean).slice(0,6);
+ const toast=document.getElementById('updateToast');
+ if(!toast)return;
  document.getElementById('updateToastVersion').textContent='POINTS '+info.version+' 已成功安装';
- document.getElementById('updateToastNotes').textContent=notes.length?notes.map(x=>x.replace(/^[-*•]\s*/, '• ')).join('\n'):'• 性能优化与问题修复';
- let idleTimer=0,touchY=0;
- const collapse=()=>{clearTimeout(idleTimer);toast.classList.add('collapsed');backdrop.classList.remove('show')};
- const expand=()=>{toast.classList.remove('collapsed');backdrop.classList.add('show');resetIdle()};
- const resetIdle=()=>{clearTimeout(idleTimer);idleTimer=setTimeout(collapse,10000)};
- toast.classList.remove('hide','collapsed');toast.classList.add('show');backdrop.classList.add('show');resetIdle();
- backdrop.onclick=collapse;
- toast.onclick=()=>{if(toast.classList.contains('collapsed'))expand();else resetIdle()};
- toast.onpointerdown=resetIdle;toast.onpointermove=resetIdle;toast.ontouchstart=e=>{touchY=e.touches?.[0]?.clientY||0;resetIdle()};
- toast.ontouchend=e=>{const endY=e.changedTouches?.[0]?.clientY||touchY;if(endY-touchY>75)collapse();else resetIdle()};
- document.getElementById('updateToastClose').onclick=e=>{e.stopPropagation();collapse()};
+ const notes=document.getElementById('updateToastNotes');
+ const items=String(info.notes||'').trim().split(/\\r?\\n/).filter(Boolean).slice(0,6);
+ notes.textContent=items.length?items.map(x=>x.replace(/^[-*•]\\s*/, '• ')).join('\\n'):'• 性能优化与问题修复';
+ toast.classList.remove('hide');
+ toast.classList.add('show');
+ let closeTimer=0;
+ const close=()=>{clearTimeout(closeTimer);toast.classList.remove('show');toast.classList.add('hide')};
+ const closeButton=document.getElementById('updateToastClose');
+ closeButton.onclick=event=>{event.preventDefault();event.stopPropagation();close()};
+ closeTimer=setTimeout(close,6000);
 }
 try{
  const updateInfo=updater?.consumeInstalledUpdate();
