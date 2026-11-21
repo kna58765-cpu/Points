@@ -2,10 +2,10 @@ import { FileTransfer } from '@capacitor/file-transfer';
 import { Filesystem, Directory } from '@capacitor/filesystem';
 import { FileOpener } from '@capacitor-community/file-opener';
 
-const APP_VERSION = 'T098';
+const APP_VERSION = 'T099';
 const REPOSITORY = 'kna58765-cpu/Points';
 const RELEASE_API = 'https://api.github.com/repos/' + REPOSITORY + '/releases?per_page=10';
-const T098_NOTES = '• 全局界面层级与间距优化\\n• 优化邮箱登录和注册页面布局\\n• 新增密码显示/隐藏控制\\n• 保留个人账号与积分云同步\\n• 保持原固定签名，支持覆盖安装';
+const T099_NOTES = '• 重新设计设置页的检查更新界面\\n• 更新内容、版本号与安装提示分区展示\\n• 优化更新状态和 APK 下载进度视觉反馈\\n• 明确官方安装包来源与覆盖安装步骤\\n• 保持固定签名，升级后保留原有数据';
 
 function versionNumber(value) {
   const match = String(value || '').match(/T?(\d+)/i);
@@ -79,7 +79,7 @@ export function consumeInstalledUpdate() {
   if (installed && installed !== APP_VERSION) {
     info = pending?.version === APP_VERSION
       ? pending
-      : { version: APP_VERSION, notes: T098_NOTES };
+      : { version: APP_VERSION, notes: T099_NOTES };
   }
 
   // A cancelled installation must not leave a stale "pending" success notice.
