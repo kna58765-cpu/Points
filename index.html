@@ -791,8 +791,8 @@ function startInviteRotation(){
   return;
  }
  inviteBtn.hidden=false;
- rotateInviteIfDue();
- inviteRotationTimer=setInterval(()=>rotateInviteIfDue(),60*1000);
+ rotateInviteIfDue().catch(()=>{});
+ inviteRotationTimer=setInterval(()=>rotateInviteIfDue().catch(()=>{}),60*1000);
 }
 let activeTeamId=localStorage.getItem('points-cloud-team')||'';
 let activeTeamRole='member';
