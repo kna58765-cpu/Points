@@ -193,6 +193,8 @@ body{width:100%;max-width:100%;min-width:0;overflow-x:clip}
 #cloudInviteCode{flex:1 1 100%!important}
 #cloudTeamControls button{flex:1 1 auto}
 #cloudInviteResult,#cloudMessage,#cloudStatus,#cloudTeamStatus{overflow-wrap:anywhere;word-break:break-word}
+#cloudInviteResult{display:block;min-height:0;padding:12px 14px;border:1px solid #e7e7e7;border-radius:14px;background:#f8f8f8;color:#111;font-size:15px;font-weight:700;line-height:1.6}
+#cloudInviteResult:empty{display:none}
 .page-view,.panel,.hero,.stats,.members,.section-head{min-width:0;max-width:100%}
 nav{width:100%;max-width:100%;gap:clamp(2px,2vw,14px)}
 nav button{min-width:0;white-space:nowrap}
@@ -400,6 +402,22 @@ const joinTeamBtn=document.getElementById('cloudJoinTeam');
 const inviteBtn=document.getElementById('cloudMakeInvite');
 const copyInviteBtn=document.getElementById('cloudCopyInvite');
 let generatedInviteCode='';
+function restoreSavedInvite(teamId){
+ const key='points-invite-'+teamId;
+ try{
+  const saved=JSON.parse(localStorage.getItem(key)||'null');
+  if(saved?.code&&Number(saved.createdAt)>0&&Date.now()-Number(saved.createdAt)<7*24*60*60*1000){
+   generatedInviteCode=String(saved.code);
+   inviteResult.textContent='当前邀请码：'+generatedInviteCode+'（最多 30 人使用，有效期 7 天）';
+   copyInviteBtn.hidden=false;
+   return;
+  }
+ }catch(e){}
+ generatedInviteCode='';
+ inviteResult.textContent='';
+ copyInviteBtn.hidden=true;
+ localStorage.removeItem(key);
+}
 let activeTeamId=localStorage.getItem('points-cloud-team')||'';
 let activeUserId='';
 let unsubscribeState=null,saveTimer=null,applyingCloud=false;
@@ -416,6 +434,7 @@ async function activateTeam(teamId,preferCloud){
    setTeamStatus('已连接团队 · 云端实时更新');
  });
  inviteBtn.hidden=false;
+ restoreSavedInvite(activeTeamId);
  // Keep team/invite controls visible on the dashboard after the auth gate closes.
  const teamPagePanel=document.getElementById('teamPagePanel');
  if(teamPagePanel&&teamControls.parentElement!==teamPagePanel){teamPagePanel.appendChild(teamControls);teamControls.style.display='block';teamControls.hidden=false;teamControls.style.margin='14px 0 0';}
@@ -467,7 +486,7 @@ joinTeamBtn.addEventListener('click',async()=>{
 inviteBtn.addEventListener('click',async()=>{
  if(!activeTeamId)return;
  inviteBtn.disabled=true;inviteBtn.textContent='正在生成…';
- try{const code=await cloudApi.createInvite(activeTeamId,30);generatedInviteCode=String(code);inviteResult.textContent='邀请码：'+generatedInviteCode+'（最多 30 人使用，有效期 7 天）';copyInviteBtn.hidden=false;showMessage('邀请码已生成，点击「复制邀请码」发送给成员。')}
+ try{const code=await cloudApi.createInvite(activeTeamId,30);generatedInviteCode=String(code);localStorage.setItem('points-invite-'+activeTeamId,JSON.stringify({code:generatedInviteCode,createdAt:Date.now()}));inviteResult.textContent='当前邀请码：'+generatedInviteCode+'（最多 30 人使用，有效期 7 天）';copyInviteBtn.hidden=false;showMessage('邀请码已生成并保存。点击「复制邀请码」发送给成员。')}
  catch(e){showMessage('生成邀请码失败：'+errorText(e),true)}
  finally{inviteBtn.disabled=false;inviteBtn.textContent='生成邀请码'}
 });
