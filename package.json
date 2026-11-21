@@ -1,6 +1,6 @@
 {
   "name": "points-android",
-  "version": "0.0.74",
+  "version": "0.0.75",
   "private": true,
   "description": "POINTS Android app built with Capacitor",
   "scripts": {
@@ -11,7 +11,8 @@
   "dependencies": {
     "@capacitor/android": "8.6.2",
     "@capacitor/core": "8.6.2",
-    "@supabase/supabase-js": "^2.57.4"
+    "@supabase/supabase-js": "^2.57.4",
+    "@capacitor/browser": "^8.0.0"
   },
   "devDependencies": {
     "@capacitor/cli": "8.6.2",
