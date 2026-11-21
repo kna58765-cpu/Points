@@ -68,6 +68,9 @@ export function onAuthStateChange(callback) {
 export async function createTeam(name) {
   return rpc("create_team", { team_name: String(name || "").trim() });
 }
+export async function dissolveTeam(teamId) {
+  return rpc("dissolve_team", { p_team_id: teamId });
+}
 export async function createInvite(teamId, maxUses = 20) {
   return rpc("create_team_invite", { p_team_id: teamId, p_max_uses: maxUses });
 }
