@@ -454,9 +454,39 @@ nav button.active{box-shadow:0 7px 18px rgba(5,8,14,.24),inset 0 1px 0 rgba(255,
 .section-head{padding-inline:2px}
 @media(prefers-reduced-motion:reduce){.stat,.member{transition:none}}
 
+
+/* T097 OrangeOS 7-inspired full-app visual system */
+:root{--os-bg:#f3f5f8;--os-ink:#17191d;--os-muted:#858b95;--os-warm:#ff9a4a;--os-shadow:0 18px 48px rgba(39,53,78,.10),inset 0 1px 0 rgba(255,255,255,.92)}
+html{background:var(--os-bg);scroll-behavior:smooth}
+body{background:radial-gradient(ellipse at 6% 0%,rgba(255,177,112,.19),transparent 36%),radial-gradient(ellipse at 96% 12%,rgba(135,174,255,.20),transparent 34%),linear-gradient(160deg,#f8f9fb,#eef1f6 58%,#f6f4f2);color:var(--os-ink)}
+.app{isolation:isolate}.app:before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background:radial-gradient(ellipse at 50% 34%,rgba(255,255,255,.55),transparent 58%)}
+.brand{letter-spacing:2px}.app-version{padding:5px 9px;border-radius:999px;background:#ffffff8c;border:1px solid #fff8;display:inline-block}
+.hero{position:relative;overflow:hidden;border:1px solid #ffffff24;background:linear-gradient(125deg,#252b35,#11151c 56%,#292b31);border-radius:30px;box-shadow:0 22px 54px #131b2838,inset 0 1px 0 #ffffff26}
+.hero:before{content:"";position:absolute;inset:-35% -15% auto 32%;height:150%;background:radial-gradient(ellipse,rgba(255,173,105,.23),transparent 62%);pointer-events:none}
+.hero:after{content:"";position:absolute;right:9%;top:0;width:34%;height:1px;background:linear-gradient(90deg,transparent,#ffffffaa,transparent)}
+.hero>*{position:relative;z-index:1}.total{text-shadow:0 4px 24px #0004}
+.stat,.member,.panel{background:linear-gradient(145deg,#ffffffe0,#ffffff94);border:1px solid #ffffffb8;box-shadow:var(--os-shadow);-webkit-backdrop-filter:blur(22px) saturate(1.35);backdrop-filter:blur(22px) saturate(1.35)}
+.stat{border-radius:23px}.member{border-radius:25px;transition:transform .24s cubic-bezier(.2,.8,.2,1),box-shadow .24s ease}
+.member:hover{transform:translateY(-3px);box-shadow:0 22px 44px #27354e24,inset 0 1px 0 #fff}
+.avatar{background:linear-gradient(145deg,#303640,#11151b);box-shadow:0 6px 16px #15192324,inset 0 1px 0 #ffffff35}
+.plain,.ui-btn.primary{background:linear-gradient(135deg,#272c35,#11151c 75%);border:1px solid #ffffff26;box-shadow:0 8px 20px #20273524,inset 0 1px 0 #ffffff24}
+.outline,.ui-btn.secondary,.control-select>button{background:linear-gradient(145deg,#ffffffd9,#f4f6f9b8);border:1px solid #ffffffd9;box-shadow:0 5px 18px #35445d0b,inset 0 1px 0 #fff}
+.actions button{border-radius:15px;transition:transform .18s ease,filter .18s ease}.actions button:active{transform:scale(.94)}
+nav{background:linear-gradient(135deg,#ffffffc7,#eff3f99a);border:1px solid #ffffffdf;border-bottom:0;box-shadow:0 -8px 36px #2a364c17,inset 0 1px 0 #fff;-webkit-backdrop-filter:blur(30px) saturate(1.5);backdrop-filter:blur(30px) saturate(1.5)}
+nav button{border-radius:18px;transition:all .22s cubic-bezier(.2,.8,.2,1)}
+nav button.active{background:linear-gradient(140deg,#343a45,#171b22);color:#fff;box-shadow:0 7px 18px #1c24332a,inset 0 1px 0 #ffffff35}
+.modal-bg{background:#1c222d48;-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
+.modal{background:linear-gradient(145deg,#fffffff5,#f5f7fae0);border:1px solid #ffffffed;border-radius:30px;box-shadow:0 28px 80px #1f28373d,inset 0 1px 0 #fff;-webkit-backdrop-filter:blur(32px) saturate(1.5);backdrop-filter:blur(32px) saturate(1.5)}
+.field{background:#ffffffc2;border:1px solid #fff;box-shadow:inset 0 1px 4px #34445b0a}.field:focus{border-color:#9eafc8;box-shadow:0 0 0 4px #a8bad52b}
+.control-menu{background:#fafbfdde;border:1px solid #fff;box-shadow:0 22px 60px #27344b24;backdrop-filter:blur(30px) saturate(1.5)}
+.rowline{border-color:#e8ebf1}.empty{color:#8a919c}
+@media(prefers-reduced-motion:no-preference){.hero,.stat,.member,.plain,.outline,.ui-btn,nav button,.modal{animation:osSurfaceIn .32s cubic-bezier(.18,.72,.22,1) both}.stat:nth-child(2){animation-delay:35ms}.stat:nth-child(3){animation-delay:70ms}.member:active{transform:scale(.985)}}
+@keyframes osSurfaceIn{from{opacity:.7;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
+@media(prefers-reduced-transparency:reduce){.stat,.member,.panel,nav,.modal,.control-menu{backdrop-filter:none!important;background:#fff!important}}
+
 </style></head>
 <body class="auth-required"><section id="authGate"><div class="auth-brand"><div class="auth-logo">P<span>.</span></div><div class="auth-wordmark">POINTS</div><p>每一分，都有迹可循。</p></div><div id="authGateSlot"></div><script>document.addEventListener("DOMContentLoaded",function(){var gate=document.getElementById("authGateSlot"),panel=document.getElementById("cloudAuth");if(gate&&panel)gate.appendChild(panel);});</script><div class="auth-foot">邮箱登录 · 个人数据 · 云端同步</div></section><main class="app">
-<header><div><div class="brand">POINTS<span> / SCORE</span></div><div class="app-version">T096</div></div><div class="sub">个人云端同步 · T096</div></header>
+<header><div><div class="brand">POINTS<span> / SCORE</span></div><div class="app-version">T097</div></div><div class="sub">个人云端同步 · T097</div></header>
 <section class="panel" id="cloudAuth" style="padding:18px;margin:0 0 18px">
   <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
     <div><b>邮箱账号</b><div class="muted" id="cloudStatus">尚未登录 · 等待 Supabase 项目配置</div></div>
