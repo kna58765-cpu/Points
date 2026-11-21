@@ -264,6 +264,7 @@ body.auth-required #authGate{display:flex;position:fixed;inset:0;z-index:100;bac
       <input class="field" id="cloudInviteCode" maxlength="16" placeholder="输入团队邀请码" style="flex:1;min-width:130px;margin:0">
       <button class="outline" id="cloudJoinTeam" type="button">加入团队</button>
       <button class="plain" id="cloudMakeInvite" type="button" hidden>生成邀请码</button>
+      <button class="outline" id="cloudDissolveTeam" type="button" hidden style="background:#fff0f0;border:1px solid #e5484d;color:#d92d35;font-weight:800">解散团队</button>
       <button class="outline" id="cloudCopyInvite" type="button" hidden>复制邀请码</button>
     </div>
     <div class="muted" id="cloudInviteResult" style="margin-top:9px;word-break:break-all"></div>
@@ -442,6 +443,7 @@ const createTeamBtn=document.getElementById('cloudCreateTeam');
 const joinTeamBtn=document.getElementById('cloudJoinTeam');
 const inviteBtn=document.getElementById('cloudMakeInvite');
 const copyInviteBtn=document.getElementById('cloudCopyInvite');
+const dissolveTeamBtn=document.getElementById('cloudDissolveTeam');
 let generatedInviteCode='';
 function restoreSavedInvite(teamId){
  const key='points-invite-'+teamId;
@@ -460,11 +462,13 @@ function restoreSavedInvite(teamId){
  localStorage.removeItem(key);
 }
 let activeTeamId=localStorage.getItem('points-cloud-team')||'';
+let activeTeamRole='member';
+let activeTeamName='';
 let activeUserId='';
 let unsubscribeState=null,saveTimer=null,applyingCloud=false;
 function setTeamStatus(message){teamStatus.textContent=message}
-async function activateTeam(teamId,preferCloud){
- activeTeamId=teamId;localStorage.setItem('points-cloud-team',teamId);
+async function activateTeam(teamId,preferCloud,role='member',teamName=''){
+ activeTeamId=teamId;activeTeamRole=role||'member';activeTeamName=teamName||activeTeamName||'我的团队';localStorage.setItem('points-cloud-team',teamId);
  if(unsubscribeState){unsubscribeState();unsubscribeState=null}
  const cloudState=await cloudApi.loadTeamState(teamId);
  if(cloudState?.state&&preferCloud){applyingCloud=true;window.pointsLocalBridge.apply(cloudState.state);applyingCloud=false}
@@ -475,12 +479,14 @@ async function activateTeam(teamId,preferCloud){
    setTeamStatus('已连接团队 · 云端实时更新');
  });
  inviteBtn.hidden=false;
+ dissolveTeamBtn.hidden=activeTeamRole!=='owner';
+ createTeamBtn.hidden=true;joinTeamBtn.hidden=true;inviteInput.hidden=true;
  restoreSavedInvite(activeTeamId);
  // Keep team/invite controls visible on the dashboard after the auth gate closes.
  const teamPagePanel=document.getElementById('teamPagePanel');
  if(teamPagePanel&&teamControls.parentElement!==teamPagePanel){teamPagePanel.appendChild(teamControls);teamControls.style.display='block';teamControls.hidden=false;teamControls.style.margin='14px 0 0';}
  updateGate();
- setTeamStatus('已连接团队 · 云端实时更新');
+ setTeamStatus('当前团队：'+activeTeamName+' · '+(activeTeamRole==='owner'?'创建者':'团队成员')+' · 云端实时同步');
  showMessage('团队已连接。成员、积分和流水开始同步。');
 }
 function updateGate(){
@@ -500,11 +506,11 @@ async function initializeCloudUser(user){
   const savedTeam=localStorage.getItem('points-cloud-team')||'';
   const membership=teams.find(item=>item.team_id===savedTeam)||teams[0];
   if(membership?.team_id){
-   await activateTeam(membership.team_id,true);
+   await activateTeam(membership.team_id,true,membership.role,membership.team?.name||'我的团队');
   }else{
-   activeTeamId='';
+   activeTeamId='';activeTeamRole='member';activeTeamName='';
    localStorage.removeItem('points-cloud-team');
-   inviteBtn.hidden=true;
+   inviteBtn.hidden=true;dissolveTeamBtn.hidden=true;createTeamBtn.hidden=false;joinTeamBtn.hidden=false;inviteInput.hidden=false;
    setTeamStatus('账号已登录 · 请创建团队或输入邀请码');
   }
  }catch(e){setTeamStatus('云端团队读取失败：'+errorText(e))}
@@ -515,8 +521,30 @@ updateGate();
 createTeamBtn.addEventListener('click',async()=>{
  if(!cloudApi?.cloudReady||!activeUserId)return showMessage('请先登录云端账号。',true);
  const name=prompt('请输入团队名称');if(!name?.trim())return;
- try{const id=await cloudApi.createTeam(name.trim());await activateTeam(id,false);inviteResult.textContent='团队创建成功。点击「生成邀请码」邀请成员。'}
+ try{const id=await cloudApi.createTeam(name.trim());await activateTeam(id,false,'owner',name.trim());inviteResult.textContent='团队创建成功。点击「生成邀请码」邀请成员。'}
  catch(e){showMessage('创建团队失败：'+errorText(e),true)}
+});
+dissolveTeamBtn.addEventListener('click',async()=>{
+ if(!activeTeamId||activeTeamRole!=='owner')return showMessage('只有团队创建者可以解散团队。',true);
+ const teamName=activeTeamName||'当前团队';
+ if(!confirm('确定解散「'+teamName+'」吗？团队成员、积分流水、邀请码和云端同步数据都将被永久删除，且无法恢复。'))return;
+ dissolveTeamBtn.disabled=true;dissolveTeamBtn.textContent='正在解散…';
+ try{
+  await cloudApi.dissolveTeam(activeTeamId);
+  if(unsubscribeState){unsubscribeState();unsubscribeState=null}
+  localStorage.removeItem('points-invite-'+activeTeamId);
+  localStorage.removeItem('points-cloud-team');
+  activeTeamId='';activeTeamRole='member';activeTeamName='';generatedInviteCode='';
+  inviteResult.textContent='';inviteBtn.hidden=true;copyInviteBtn.hidden=true;dissolveTeamBtn.hidden=true;
+  createTeamBtn.hidden=false;joinTeamBtn.hidden=false;inviteInput.hidden=false;
+  teamControls.hidden=false;
+  const auth=document.getElementById('cloudAuth');if(auth&&teamControls.parentElement!==auth)auth.appendChild(teamControls);
+  teamControls.style.display='block';
+  setTeamStatus('团队已解散 · 可以重新创建团队或加入其他团队');
+  updateGate();
+  showMessage('团队已解散。');
+ }catch(e){showMessage('解散团队失败：'+errorText(e),true)}
+ finally{dissolveTeamBtn.disabled=false;dissolveTeamBtn.textContent='解散团队'}
 });
 joinTeamBtn.addEventListener('click',async()=>{
  if(!cloudApi?.cloudReady||!activeUserId)return showMessage('请先登录云端账号。',true);
