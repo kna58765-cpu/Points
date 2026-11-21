@@ -197,6 +197,16 @@ nav button.active{
       <button class="outline" id="cloudRegister" type="button">注册账号</button>
     </div>
   </div>
+  <div id="cloudTeamControls" hidden style="margin-top:14px;border-top:1px solid #eee;padding-top:14px">
+    <b>我的云端团队</b><div class="muted" id="cloudTeamStatus">还没有加入团队</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
+      <button class="outline" id="cloudCreateTeam" type="button">创建团队</button>
+      <input class="field" id="cloudInviteCode" maxlength="16" placeholder="输入团队邀请码" style="flex:1;min-width:130px;margin:0">
+      <button class="outline" id="cloudJoinTeam" type="button">加入团队</button>
+      <button class="plain" id="cloudMakeInvite" type="button" hidden>生成邀请码</button>
+    </div>
+    <div class="muted" id="cloudInviteResult" style="margin-top:9px;word-break:break-all"></div>
+  </div>
   <div class="muted" id="cloudMessage" role="status" style="margin-top:10px">POINTS 正在从 Appwrite 迁移到 Supabase。账号与积分同步分阶段启用。</div>
 </section>
 <section class="page-view active" data-view="overview">
@@ -213,7 +223,7 @@ nav button.active{
 <div class="modal-bg" id="modal"><div class="modal"><h3 id="modalTitle">添加成员</h3><label class="sub">成员名称</label><input class="field" id="nameInput" maxlength="24" placeholder="输入成员名称"><label class="sub" id="groupLabel">所属分组</label><input class="field" id="groupInput" maxlength="20" placeholder="例如：一班、二班、管理员组"><label class="sub hide" id="colorLabel">头像颜色</label><select class="field hide" id="colorInput"><option value="#111111">黑色</option><option value="#555555">深灰</option><option value="#777777">灰色</option><option value="#9a9a9a">浅灰</option><option value="#333333">炭黑</option></select><label class="sub" id="amountLabel">积分数值</label><input class="field" id="amountInput" type="number" min="1" max="99999" placeholder="例如 10"><label class="sub hide" id="noteLabel">备注（选填）</label><input class="field hide" id="noteInput" maxlength="80" placeholder="例如：完成任务、迟到"><div class="modal-actions"><button class="outline" id="deleteMember" style="display:none">删除成员</button><button class="outline" id="cancel">取消</button><button class="plain" id="confirm">确认</button></div></div></div>
 <div class="modal-bg" id="detailModal"><div class="modal" style="max-height:85dvh;overflow:auto"><div style="display:flex;justify-content:space-between"><h3 id="detailName">成员详情</h3><button class="outline" id="closeDetail">关闭</button></div><div class="hero" style="margin:8px 0 14px;padding:20px"><div><small>MEMBER TOTAL POINTS</small><div class="total" id="detailPoints">0</div></div></div><div class="stats"><div class="stat"><label>累计加分</label><strong id="detailEarned">0</strong></div><div class="stat"><label>累计扣分</label><strong id="detailSpent">0</strong></div><div class="stat"><label>记录次数</label><strong id="detailCount">0</strong></div></div><div class="section-head"><h2>全部积分记录</h2></div><section class="panel" id="detailHistory"></section></div></div><script>
 const KEY='points-v1';let data=JSON.parse(localStorage.getItem(KEY)||'null')||{members:[],logs:[]};data.settings=Object.assign({maxAdd:99999,maxDeduct:99999},data.settings||{});data.audit=Array.isArray(data.audit)?data.audit:[];let mode='member',target=null;let adminMode=true;
-const $=id=>document.getElementById(id);const requireAdmin=()=>true;const hashPin=async pin=>{const bytes=new TextEncoder().encode(pin);const digest=await crypto.subtle.digest('SHA-256',bytes);return [...new Uint8Array(digest)].map(x=>x.toString(16).padStart(2,'0')).join('')};const save=()=>{localStorage.setItem(KEY,JSON.stringify(data));render()};const audit=(action,detail)=>{data.audit.unshift({action,detail,time:Date.now()});data.audit=data.audit.slice(0,300)};
+const $=id=>document.getElementById(id);const requireAdmin=()=>true;const hashPin=async pin=>{const bytes=new TextEncoder().encode(pin);const digest=await crypto.subtle.digest('SHA-256',bytes);return [...new Uint8Array(digest)].map(x=>x.toString(16).padStart(2,'0')).join('')};const save=()=>{localStorage.setItem(KEY,JSON.stringify(data));render();window.dispatchEvent(new CustomEvent('points:data-changed',{detail:data}))};const audit=(action,detail)=>{data.audit.unshift({action,detail,time:Date.now()});data.audit=data.audit.slice(0,300)};
 function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function render(){let total=data.members.reduce((s,m)=>s+m.points,0);$('total').textContent=total.toLocaleString();$('memberCount').textContent=data.members.length;$('earned').textContent=data.logs.filter(x=>x.delta>0).reduce((s,x)=>s+x.delta,0).toLocaleString();$('spent').textContent=Math.abs(data.logs.filter(x=>x.delta<0).reduce((s,x)=>s+x.delta,0)).toLocaleString();
 const groups=[...new Set(data.members.map(m=>String(m.group||'未分组').trim()||'未分组'))].sort((a,b)=>a.localeCompare(b,'zh-CN'));const selectedGroup=$('groupFilter')?.value||'all';$('groupFilter').innerHTML='<option value="all">全部分组</option>'+groups.map(g=>'<option value="'+esc(g)+'">'+esc(g)+'</option>').join('');$('groupFilter').value=groups.includes(selectedGroup)?selectedGroup:'all';const groupMembers=data.members.filter(m=>$('groupFilter').value==='all'?(true):(String(m.group||'未分组')===$('groupFilter').value));const ranked=groupMembers.slice().sort((a,b)=>b.points-a.points);$('leaderboard').innerHTML=ranked.length?ranked.slice(0,$('rankFilter')?.value==='all'?ranked.length:5).map((m,i)=>'<div class="rowline"><div style="display:flex;align-items:center;gap:12px"><div class="avatar" style="background:'+(m.color||'#111111')+'">'+(i+1)+'</div><div><b>'+esc(m.name)+'</b><div class="muted">'+esc(m.group||'未分组')+' · '+(i===0?'当前第一名':i===1?'当前第二名':i===2?'当前第三名':'排行榜')+'</div></div></div><b>'+m.points.toLocaleString()+' PTS</b></div>').join(''):'<div class="empty">添加成员后，这里会显示排行榜。</div>';const keyword=$('memberSearch').value.trim().toLocaleLowerCase();const visible=ranked.filter(m=>m.name.toLocaleLowerCase().includes(keyword));$('members').innerHTML=visible.length?visible.map((m,i)=>'<article class="member"><div class="member-top"><div class="avatar" style="background:'+(m.color||'#111111')+'">'+(i+1)+'</div><div class="member-name">'+esc(m.name)+'<div class="muted">'+esc(m.group||'未分组')+'</div></div><button class="outline" onclick="editMember(\''+m.id+'\')">•••</button></div><div class="points">'+m.points.toLocaleString()+' <span class="sub">PTS</span></div><div class="actions"><button data-id="'+m.id+'" onclick="showMemberDetail(this.dataset.id)">详情</button><button onclick="change(\''+m.id+'\',-1)">− 扣分</button><button class="plus" onclick="change(\''+m.id+'\',1)">＋ 加分</button></div></article>').join(''):'<div class="panel empty">'+(keyword?'没有找到匹配的成员。':'还没有成员，添加第一位成员开始吧。')+'</div>';
@@ -245,6 +255,7 @@ $('mainNav').addEventListener('click',event=>{
   if(button)showPage(button.dataset.page);
 });
 render();
+window.pointsLocalBridge={read:()=>data,apply:(snapshot)=>{data=JSON.parse(JSON.stringify(snapshot||{members:[],logs:[]}));data.settings=Object.assign({maxAdd:99999,maxDeduct:99999},data.settings||{});data.audit=Array.isArray(data.audit)?data.audit:[];localStorage.setItem(KEY,JSON.stringify(data));render()}};
 if(!window.Capacitor?.isNativePlatform?.()&&'serviceWorker' in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
 </script>
 <div class="modal-bg" id="bulkAddModal" aria-hidden="true"><div class="modal" role="dialog" aria-modal="true" aria-labelledby="bulkAddTitle"><h3 id="bulkAddTitle">批量添加成员</h3><div class="sub" style="margin-bottom:10px">每行输入一个姓名，重复姓名会自动跳过</div><textarea class="field" id="bulkNames" placeholder="例如：&#10;Omicron&#10;Haval&#10;Delta"></textarea><div class="modal-actions"><button class="ui-btn secondary" id="bulkCancel" type="button">取消</button><button class="ui-btn primary" id="bulkConfirm" type="button">添加成员</button></div></div></div>
@@ -288,17 +299,76 @@ try{
  cloudApi=await import('./supabase-cloud.js');
  if(!cloudApi.cloudReady)throw new Error('Supabase 项目尚未配置。等待连接云端项目后即可启用。');
  const user=await cloudApi.currentUser();
- showUser(user);
- showMessage(user?'Supabase 账号已连接。积分云端同步仍在接入中。':'可以使用 Supabase 邮箱注册或登录。');
+ showUser(user); await initializeCloudUser(user);
+ showMessage(user?'Supabase 账号已连接。选择或创建团队即可同步积分。':'可以使用 Supabase 邮箱注册或登录。');
 }catch(error){
  statusEl.textContent='云端服务待配置';
  showMessage(errorText(error),true);
 }
+
+// Cloud team and shared snapshot sync.
+const teamControls=document.getElementById('cloudTeamControls');
+const teamStatus=document.getElementById('cloudTeamStatus');
+const inviteInput=document.getElementById('cloudInviteCode');
+const inviteResult=document.getElementById('cloudInviteResult');
+const createTeamBtn=document.getElementById('cloudCreateTeam');
+const joinTeamBtn=document.getElementById('cloudJoinTeam');
+const inviteBtn=document.getElementById('cloudMakeInvite');
+let activeTeamId=localStorage.getItem('points-cloud-team')||'';
+let activeUserId='';
+let unsubscribeState=null,saveTimer=null,applyingCloud=false;
+function setTeamStatus(message){teamStatus.textContent=message}
+async function activateTeam(teamId,preferCloud){
+ activeTeamId=teamId;localStorage.setItem('points-cloud-team',teamId);
+ if(unsubscribeState){unsubscribeState();unsubscribeState=null}
+ const cloudState=await cloudApi.loadTeamState(teamId);
+ if(cloudState?.state&&preferCloud){applyingCloud=true;window.pointsLocalBridge.apply(cloudState.state);applyingCloud=false}
+ else await cloudApi.writeTeamState(teamId,window.pointsLocalBridge.read());
+ unsubscribeState=cloudApi.watchTeamState(teamId,payload=>{
+   const next=payload?.new;if(!next?.state||next.updated_by===activeUserId||applyingCloud)return;
+   applyingCloud=true;window.pointsLocalBridge.apply(next.state);applyingCloud=false;
+   setTeamStatus('已连接团队 · 云端实时更新');
+ });
+ inviteBtn.hidden=false;
+ setTeamStatus('已连接团队 · 云端实时更新');
+ showMessage('团队已连接。成员、积分和流水开始同步。');
+}
+async function initializeCloudUser(user){
+ activeUserId=user?.id||'';
+ teamControls.hidden=!user;
+ if(!user)return;
+ if(activeTeamId){try{await activateTeam(activeTeamId,true)}catch(e){setTeamStatus('团队连接失败：'+errorText(e))}}
+}
+createTeamBtn.addEventListener('click',async()=>{
+ if(!cloudApi?.cloudReady||!activeUserId)return showMessage('请先登录云端账号。',true);
+ const name=prompt('请输入团队名称');if(!name?.trim())return;
+ try{const id=await cloudApi.createTeam(name.trim());await activateTeam(id,false);inviteResult.textContent='团队创建成功。点击「生成邀请码」邀请成员。'}
+ catch(e){showMessage('创建团队失败：'+errorText(e),true)}
+});
+joinTeamBtn.addEventListener('click',async()=>{
+ if(!cloudApi?.cloudReady||!activeUserId)return showMessage('请先登录云端账号。',true);
+ const code=inviteInput.value.trim();if(!code)return showMessage('请先输入邀请码。',true);
+ try{const id=await cloudApi.acceptInvite(code);await activateTeam(id,true);inviteInput.value='';inviteResult.textContent='已成功加入团队。'}
+ catch(e){showMessage('加入团队失败：'+errorText(e),true)}
+});
+inviteBtn.addEventListener('click',async()=>{
+ if(!activeTeamId)return;
+ try{const code=await cloudApi.createInvite(activeTeamId,30);inviteResult.textContent='邀请码：'+code+'（最多 30 人使用，有效期 7 天）'}
+ catch(e){showMessage('生成邀请码失败：'+errorText(e),true)}
+});
+window.addEventListener('points:data-changed',()=>{
+ if(!activeTeamId||!activeUserId||applyingCloud)return;
+ clearTimeout(saveTimer);saveTimer=setTimeout(async()=>{
+  try{await cloudApi.writeTeamState(activeTeamId,window.pointsLocalBridge.read());setTeamStatus('已同步 · '+new Date().toLocaleTimeString())}
+  catch(e){setTeamStatus('本机已保存，云端同步失败，请检查网络或团队权限');showMessage(errorText(e),true)}
+ },450);
+});
+
 document.getElementById('cloudSignIn').addEventListener('click',async()=>{
  if(!cloudApi?.cloudReady)return showMessage('Supabase 云端项目尚未配置。',true);
  const email=emailEl.value.trim(),password=passwordEl.value;
  if(!email||!password)return showMessage('请填写邮箱和密码。',true);
- try{await cloudApi.login(email,password);const user=await cloudApi.currentUser();showUser(user);showMessage('登录成功。下一阶段将连接团队积分数据。');passwordEl.value=''}
+ try{await cloudApi.login(email,password);const user=await cloudApi.currentUser();showUser(user);await initializeCloudUser(user);showMessage('登录成功。请创建团队或输入邀请码加入。');passwordEl.value=''}
  catch(error){showMessage(errorText(error),true)}
 });
 document.getElementById('cloudRegister').addEventListener('click',async()=>{
@@ -306,11 +376,11 @@ document.getElementById('cloudRegister').addEventListener('click',async()=>{
  const name=nameEl.value.trim(),email=emailEl.value.trim(),password=passwordEl.value;
  if(!name||!email||!password)return showMessage('注册请填写昵称、邮箱和密码。',true);
  if(password.length<8)return showMessage('密码至少需要 8 位。',true);
- try{await cloudApi.register(email,password,name);const user=await cloudApi.currentUser();showUser(user);showMessage(user?'账号注册成功。':'注册成功，请检查邮箱确认链接。');passwordEl.value=''}
+ try{await cloudApi.register(email,password,name);const user=await cloudApi.currentUser();showUser(user);await initializeCloudUser(user);showMessage(user?'账号注册成功，请创建团队或加入团队。':'注册成功，请检查邮箱确认链接。');passwordEl.value=''}
  catch(error){showMessage(errorText(error),true)}
 });
 logoutEl.addEventListener('click',async()=>{
- try{await cloudApi.logout();showUser(null);showMessage('已退出登录。')}
+ try{await cloudApi.logout();showUser(null);await initializeCloudUser(null);if(unsubscribeState){unsubscribeState();unsubscribeState=null}activeTeamId='';localStorage.removeItem('points-cloud-team');inviteBtn.hidden=true;showMessage('已退出登录。当前设备积分仍保存在本地。')}
  catch(error){showMessage(errorText(error),true)}
 });
 </script></body></html>
