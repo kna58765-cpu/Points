@@ -69,12 +69,18 @@ jobs:
           # GitHub secret may contain wrapped, quoted, URL-safe, or accidentally
           # double-Base64-encoded data. Normalize without ever printing it.
           raw = raw.lstrip("\ufeff").strip().strip("\\\"'")
-          cleaned = re.sub(r"[^A-Za-z0-9+/=_-]", "", raw).replace("-", "+").replace("_", "/").rstrip("=")
+          # Normalize common copy/paste formats without exposing the secret.
+          raw = re.sub(r"^data:[^,]*,", "", raw, flags=re.I)
+          raw = raw.replace("\\n", "").replace("\\r", "")
+          cleaned = re.sub(r"[^A-Za-z0-9+/=_-]", "", raw).replace("-", "+").replace("_", "/")
+          cleaned = cleaned.replace("=", "")
+          if not cleaned:
+              raise SystemExit("Keystore secret is empty after normalization")
           cleaned += "=" * ((4 - len(cleaned) % 4) % 4)
           try:
               data = base64.b64decode(cleaned, validate=True)
           except Exception:
-              raise SystemExit("Keystore secret is not valid Base64; replace it with Base64 of the original signing file")
+              raise SystemExit("Keystore secret cannot be decoded as Base64; check repository secret encoding")
           # If the first decode is still printable Base64, decode exactly one more time.
           text_data = data.decode("ascii", errors="ignore")
           compact = re.sub(r"\s+", "", text_data)
