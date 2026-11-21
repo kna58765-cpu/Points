@@ -5,10 +5,10 @@ import { FileOpener } from '@capacitor-community/file-opener';
 const APP_VERSION = 'T076';
 const REPOSITORY = 'kna58765-cpu/Points';
 const RELEASE_API = 'https://api.github.com/repos/' + REPOSITORY + '/releases/latest';
-const T076_NOTES = '• 新增独立账号页面\n• 新增 GitHub 正式版手动检查更新\n• 新增 APK 应用内下载\n• 新增底部弹出的更新完成动画\n• 优化账号信息与页面体验';
+const T076_NOTES = '• 按键升级为流体玻璃质感\n• 底部导航支持横向滑动选择\n• 修复版本号识别逻辑\n• 优化应用内更新体验并保留更新完成动画';
 
 function versionNumber(value) {
-  const match = String(value || '').match(/T?(\\d+)/i);
+  const match = String(value || '').match(/T?(\d+)/i);
   return match ? Number(match[1]) : 0;
 }
 function formatSize(bytes) {
@@ -27,14 +27,14 @@ export async function checkForUpdate() {
   if (!latestNumber) throw new Error('正式版本标签格式不正确，无法识别版本号。');
   if (latestNumber <= currentNumber) return { updateAvailable: false, currentVersion: APP_VERSION };
   const expected = 'T' + String(latestNumber).padStart(3, '0');
-  const apkAssets = (release.assets || []).filter(asset => /\\.apk$/i.test(asset.name || '') && asset.browser_download_url);
+  const apkAssets = (release.assets || []).filter(asset => /\.apk$/i.test(asset.name || '') && asset.browser_download_url);
   const asset = apkAssets.find(item => item.name.toUpperCase().includes(expected)) || (apkAssets.length === 1 ? apkAssets[0] : null);
   if (!asset) throw new Error('正式版本 ' + expected + ' 尚未上传 APK 安装包。已留在 POINTS 内，没有打开任何网站。');
   return { updateAvailable: true, version: expected, notes: String(release.body || '').trim(), sizeText: formatSize(asset.size), size: Number(asset.size || 0), assetName: asset.name, downloadUrl: asset.browser_download_url, releaseUrl: release.html_url, publishedAt: release.published_at || '' };
 }
 export async function downloadUpdate(release, onProgress = () => {}) {
   if (!window.Capacitor?.isNativePlatform?.()) throw new Error('应用内 APK 安装仅支持 Android 正式应用环境。');
-  if (!release?.downloadUrl || !String(release.downloadUrl).startsWith('https://') || !/\\.apk$/i.test(release.assetName || '')) throw new Error('官方 APK 文件信息无效，已取消下载。');
+  if (!release?.downloadUrl || !String(release.downloadUrl).startsWith('https://') || !/\.apk$/i.test(release.assetName || '')) throw new Error('官方 APK 文件信息无效，已取消下载。');
   const path = 'POINTS-' + release.version + '.apk';
   const target = await Filesystem.getUri({ directory: Directory.Cache, path });
   onProgress({ phase: 'downloading', percent: 0, message: '正在从官方仓库下载 APK…' });
