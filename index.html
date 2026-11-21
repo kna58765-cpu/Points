@@ -400,6 +400,8 @@ const updateNotes=document.getElementById('updateNotes');
 const downloadUpdate=document.getElementById('downloadUpdate');
 let availableUpdate=null;
 let updater=null;
+let pendingToastInfo=null;
+let updateToastShown=false;
 try{updater=await import('./updater.js')}catch(e){console.error('Updater unavailable',e)}
 function updateAccountIdentity(user){
  if(!accountNickname||!accountMethod)return;
@@ -550,6 +552,7 @@ function updateGate(){
  const hasAccount=!!activeUserId;
  const hasTeam=!!activeTeamId&&inviteBtn.hidden===false;
  document.body.classList.toggle('auth-required',!(hasAccount&&hasTeam));
+ if(hasAccount&&hasTeam&&pendingToastInfo&&!updateToastShown){updateToastShown=true;const info=pendingToastInfo;pendingToastInfo=null;requestAnimationFrame(()=>showUpdateToast(info));}
  if(!hasAccount){authTitle.textContent='欢迎加入 POINTS';authCaption.textContent='登录账号，继续管理你的团队积分';}
  else if(!hasTeam){authTitle.textContent='加入你的团队';authCaption.textContent='创建团队，或输入团队邀请码继续';}
 }
@@ -578,7 +581,8 @@ await initializeCloudUser(bootUser);
 updateGate();
 accountLogoutButton?.addEventListener('click',()=>logoutEl.click());
 accountDeleteButton?.addEventListener('click',async()=>{
- if(!bootUser)return showMessage('请先登录账号。',true);
+ const current=await cloudApi.currentUser();
+ if(!current)return showMessage('请先登录账号。',true);
  if(!confirm('确定注销 POINTS 账号吗？此操作不可撤销，云端账号及关联数据将被永久删除。'))return;
  showMessage('注销服务需要先部署安全云端接口；当前版本暂未开放实际删除，账号数据不会被改动。',true);
 });
@@ -685,7 +689,7 @@ function showUpdateToast(info){
 }
 try{
  const updateInfo=updater?.consumeInstalledUpdate();
- if(updateInfo)requestAnimationFrame(()=>showUpdateToast(updateInfo));
+ if(updateInfo){pendingToastInfo=updateInfo;if(activeUserId&&activeTeamId){updateToastShown=true;pendingToastInfo=null;requestAnimationFrame(()=>showUpdateToast(updateInfo));}}
 }catch(e){console.warn('Update toast skipped',e)}
 
 logoutEl.addEventListener('click',async()=>{
