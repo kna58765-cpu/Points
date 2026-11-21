@@ -5,7 +5,7 @@ import { FileOpener } from '@capacitor-community/file-opener';
 const APP_VERSION = 'T101';
 const REPOSITORY = 'kna58765-cpu/Points';
 const RELEASE_API = 'https://api.github.com/repos/' + REPOSITORY + '/releases?per_page=10';
-const T101_NOTES = '• 优化账号页登出按钮视觉层次，采用柔和危险色与立体交互\\n• 增加退出账号说明，明确本地积分数据不会被删除\\n• 修复账号页登出按钮与实际退出流程的连接\\n• 保持固定签名，支持覆盖安装并保留本地数据';
+const T101_NOTES = '• 保留总览主页四分之一圆形空间背景与多层景深效果\\n• 优化圆形环带、球体高光与层次感，提升主界面空间氛围\\n• 优化账号页登出按钮视觉层次，采用柔和危险色与立体交互\\n• 明确退出云端账号不会删除本地积分数据，固定签名支持覆盖安装';
 
 function versionNumber(value) {
   const match = String(value || '').match(/T?(\d+)/i);
