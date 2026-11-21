@@ -232,7 +232,7 @@ body.auth-required #authGate{display:flex;position:fixed;inset:0;z-index:100;bac
 #authGate #cloudRegister{background:#fff;color:#111;border:1px solid #e3e3e3}
 #authGate .auth-title{font-size:25px;font-weight:850;letter-spacing:-.8px;margin:0 0 6px}
 #authGate .auth-caption{font-size:13px;color:#777;margin:0 0 20px}
-#authGate .auth-switch{width:100%;border:0;background:none;color:#555;text-decoration:underline;padding:14px 6px 2px;font-size:13px}
+#authGate .auth-switch{width:100%;border:0;background:none;color:#555;text-decoration:underline;padding:14px 6px 2px;font-size:13px}\n#authGate #inviteJoinPanel{margin-top:4px}\n#authGate #inviteJoinPanel .field{box-sizing:border-box}\n#authGate #inviteJoinPanel button{cursor:pointer}
 #authGate .auth-foot{color:#aaa;font-size:11px;letter-spacing:.6px;text-align:center;margin-top:22px}
 #authGate #cloudTeamControls{border-top:1px solid #eee!important}
 #authGate #cloudTeamControls b{font-size:18px}
@@ -358,6 +358,47 @@ formEl.prepend(authCaption);formEl.prepend(authTitle);
 const authSwitch=document.createElement('button');
 authSwitch.type='button';authSwitch.className='auth-switch';authSwitch.textContent='新用户？创建账号';
 formEl.appendChild(authSwitch);
+
+// Invitation-only access for people without an email address.
+const inviteEntry=document.createElement('button');
+inviteEntry.type='button';inviteEntry.className='auth-switch';
+inviteEntry.textContent='没有邮箱？填写邀请码加入';
+formEl.appendChild(inviteEntry);
+const inviteJoinPanel=document.createElement('div');
+inviteJoinPanel.id='inviteJoinPanel';
+inviteJoinPanel.hidden=true;
+inviteJoinPanel.innerHTML='<input class="field" id="inviteJoinName" maxlength="40" autocomplete="nickname" placeholder="你的昵称" style="margin-top:12px"><input class="field" id="inviteJoinCode" maxlength="16" autocomplete="off" autocapitalize="characters" placeholder="输入别人发给你的邀请码" style="margin-top:10px"><button class="plain" id="inviteJoinSubmit" type="button" style="width:100%;margin-top:10px;min-height:50px">验证邀请码并加入团队</button><button class="auth-switch" id="inviteJoinBack" type="button">返回邮箱登录</button><div class="muted" style="font-size:12px;text-align:center;margin-top:8px">仅凭有效邀请码加入，不开放自由注册</div>';
+formEl.appendChild(inviteJoinPanel);
+const inviteBaseEls=[nameEl,emailEl,passwordEl,document.getElementById('cloudSignIn'),document.getElementById('cloudRegister'),authSwitch];
+inviteEntry.addEventListener('click',()=>{
+ inviteBaseEls.forEach(el=>el.hidden=true);
+ inviteJoinPanel.hidden=false;inviteEntry.hidden=true;
+ authTitle.textContent='受邀加入 POINTS';
+ authCaption.textContent='输入团队负责人发给你的邀请码';
+});
+document.getElementById('inviteJoinBack').addEventListener('click',()=>{
+ inviteJoinPanel.hidden=true;inviteEntry.hidden=false;
+ inviteBaseEls.forEach(el=>el.hidden=false);
+ authTitle.textContent='欢迎加入 POINTS';
+ authCaption.textContent='登录账号，继续管理你的团队积分';
+});
+document.getElementById('inviteJoinSubmit').addEventListener('click',async()=>{
+ if(!cloudApi?.cloudReady)return showMessage('云端服务尚未配置。',true);
+ const nickname=document.getElementById('inviteJoinName').value.trim();
+ const code=document.getElementById('inviteJoinCode').value.trim().toUpperCase();
+ if(!nickname||!code)return showMessage('请填写昵称和别人发给你的邀请码。',true);
+ if(code.length<6)return showMessage('邀请码格式不正确，请检查后重试。',true);
+ const submit=document.getElementById('inviteJoinSubmit');
+ submit.disabled=true;submit.textContent='正在验证邀请码…';
+ try{
+  await cloudApi.joinWithInvite(code,nickname);
+  const user=await cloudApi.currentUser();
+  showUser(user);await initializeCloudUser(user);updateGate();
+  showMessage('邀请码验证成功，已加入邀请人的团队！');
+ }catch(error){showMessage(errorText(error),true)}
+ finally{submit.disabled=false;submit.textContent='验证邀请码并加入团队'}
+});
+
 let authMode='login';
 authSwitch.addEventListener('click',()=>{
  authMode=authMode==='login'?'register':'login';
