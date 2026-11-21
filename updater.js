@@ -79,7 +79,7 @@ export function consumeInstalledUpdate() {
   if (installed && installed !== APP_VERSION) {
     info = pending?.version === APP_VERSION
       ? pending
-      : { version: APP_VERSION, notes: T102.01_NOTES };
+      : { version: APP_VERSION, notes: T102_01_NOTES };
   }
 
   // A cancelled installation must not leave a stale "pending" success notice.
