@@ -98,7 +98,10 @@ jobs:
           key_path.write_bytes(data)
           Path(os.environ["RUNNER_TEMP"], "points-keystore-type").write_text(store_type)
           PY
-          export POINTS_KEYSTORE_PATH="$RUNNER_TEMP/points-release-key.jks"
+          STORE_TYPE="$(cat "$RUNNER_TEMP/points-keystore-type")"
+          KEY_EXT="p12"
+          [ "$STORE_TYPE" = "JKS" ] && KEY_EXT="jks"
+          export POINTS_KEYSTORE_PATH="$RUNNER_TEMP/points-release-key.$KEY_EXT"
           echo "POINTS_KEYSTORE_PATH=$POINTS_KEYSTORE_PATH" >> "$GITHUB_ENV"
           python3 - <<'PY'
           import os
