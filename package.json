@@ -12,7 +12,7 @@
     "@capacitor/android": "8.6.2",
     "@capacitor/core": "8.6.2",
     "@supabase/supabase-js": "^2.57.4",
-    "@capacitor/file-transfer": "^7.0.1",
+    "@capacitor/file-transfer": "^8.1.5",
     "@capacitor/filesystem": "^8.0.0",
     "@capacitor-community/file-opener": "^8.0.0"
   },
