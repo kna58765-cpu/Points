@@ -415,6 +415,9 @@ async function activateTeam(teamId,preferCloud){
    setTeamStatus('已连接团队 · 云端实时更新');
  });
  inviteBtn.hidden=false;
+ // Keep team/invite controls visible on the dashboard after the auth gate closes.
+ const appRoot=document.querySelector('.app');
+ if(appRoot&&teamControls.parentElement!==appRoot){appRoot.insertBefore(teamControls,appRoot.firstElementChild?.nextSibling||null);teamControls.style.margin='0 0 18px';}
  updateGate();
  setTeamStatus('已连接团队 · 云端实时更新');
  showMessage('团队已连接。成员、积分和流水开始同步。');
