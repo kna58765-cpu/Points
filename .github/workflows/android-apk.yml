@@ -63,49 +63,26 @@ jobs:
           test -n "$POINTS_KEY_ALIAS" || { echo "Missing POINTS_KEY_ALIAS repository secret"; exit 1; }
           test -n "$POINTS_KEY_PASSWORD" || { echo "Missing POINTS_KEY_PASSWORD repository secret"; exit 1; }
           python3 - <<'PY'
-          import base64, os, re
+          import base64, hashlib, os, re
           from pathlib import Path
           raw = os.environ["POINTS_KEYSTORE_BASE64"]
-          # GitHub secret may contain wrapped, quoted, URL-safe, or accidentally
-          # double-Base64-encoded data. Normalize without ever printing it.
-          raw = raw.lstrip("\ufeff").strip().strip("\\\"'")
-          # Normalize common copy/paste formats without exposing the secret.
-          raw = re.sub(r"^data:[^,]*,", "", raw, flags=re.I)
-          raw = raw.replace("\\n", "").replace("\\r", "")
-          cleaned = re.sub(r"[^A-Za-z0-9+/=_-]", "", raw).replace("-", "+").replace("_", "/")
-          # Remove any misplaced padding, then try the common copy/paste
-          # variants. A one-character remainder cannot be padded, so trim it.
-          cleaned = cleaned.replace("=", "")
-          if not cleaned:
-              raise SystemExit("Keystore secret is empty after normalization")
-          candidates = [cleaned]
-          if len(cleaned) % 4 == 1:
-              candidates.append(cleaned[:-1])
-          if len(cleaned) % 4 == 2:
-              candidates.append(cleaned[:-2])
-          data = None
-          for candidate in candidates:
-              candidate += "=" * ((4 - len(candidate) % 4) % 4)
-              try:
-                  decoded = base64.b64decode(candidate, validate=False)
-                  if decoded:
-                      data = decoded
-                      break
-              except Exception:
-                  continue
-          if not data:
-              raise SystemExit("Base64 secret could not be decoded; regenerate Base64 from the original keystore")
-          # A JKS file may contain long printable Base64-looking sections.
-          # Never auto-decode twice: Base64-encoded keystores must be decoded exactly once.
-          if not data:
-              raise SystemExit("Decoded signing keystore is empty")
-          # Report only the file format, never key or password contents.
+          # Remove only harmless line wrapping. Do not repair, trim, or rewrite data.
+          encoded = re.sub(r"\\s+", "", raw)
+          print(f"Signing secret character count (excluding whitespace): {len(encoded)}")
+          try:
+              data = base64.b64decode(encoded, validate=True)
+          except Exception as exc:
+              raise SystemExit(f"Strict Base64 decoding failed ({type(exc).__name__}). Secret contents were not printed.")
+          header = data[:8].hex()
+          print(f"Decoded keystore byte count: {len(data)}")
+          print(f"Decoded file header (first 8 bytes, hex): {header}")
+          print(f"Decoded file SHA-256: {hashlib.sha256(data).hexdigest()}")
           if data.startswith(bytes.fromhex("feedfeed")):
               store_type = "JKS"
           elif data.startswith(bytes.fromhex("30")):
               store_type = "PKCS12"
           else:
-              raise SystemExit("Decoded secret is not a JKS/PKCS12 keystore. Re-encode the original .jks/.p12 file as Base64 and update POINTS_KEYSTORE_BASE64.")
+              raise SystemExit("Decoded bytes are not recognized as JKS/PKCS12. Compare the diagnostic length/header with the original file locally; secret contents were not printed.")
           key_path = Path(os.environ["RUNNER_TEMP"], "points-release-key." + ("jks" if store_type == "JKS" else "p12"))
           key_path.write_bytes(data)
           Path(os.environ["RUNNER_TEMP"], "points-keystore-type").write_text(store_type)
