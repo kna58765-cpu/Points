@@ -1,12 +1,14 @@
-import { Browser } from '@capacitor/browser';
+import { FileTransfer } from '@capacitor/file-transfer';
+import { Filesystem, Directory } from '@capacitor/filesystem';
+import { FileOpener } from '@capacitor-community/file-opener';
 
 const APP_VERSION = 'T075';
 const REPOSITORY = 'kna58765-cpu/Points';
 const RELEASE_API = 'https://api.github.com/repos/' + REPOSITORY + '/releases/latest';
-const T075_NOTES = '• 新增独立账号页面\n• 新增 GitHub 正式版手动检查更新\n• 新增 APK 下载与版本升级提示\n• 新增底部弹出的更新完成动画\n• 优化账号信息与页面体验';
+const T075_NOTES = '• 新增独立账号页面\n• 新增 GitHub 正式版手动检查更新\n• 新增 APK 应用内下载\n• 新增底部弹出的更新完成动画\n• 优化账号信息与页面体验';
 
 function versionNumber(value) {
-  const match = String(value || '').match(/T?(\d+)/i);
+  const match = String(value || '').match(/T?(\\d+)/i);
   return match ? Number(match[1]) : 0;
 }
 function formatSize(bytes) {
@@ -25,16 +27,38 @@ export async function checkForUpdate() {
   if (!latestNumber) throw new Error('正式版本标签格式不正确，无法识别版本号。');
   if (latestNumber <= currentNumber) return { updateAvailable: false, currentVersion: APP_VERSION };
   const expected = 'T' + String(latestNumber).padStart(3, '0');
-  const apkAssets = (release.assets || []).filter(asset => /\.apk$/i.test(asset.name || '') && asset.browser_download_url);
+  const apkAssets = (release.assets || []).filter(asset => /\\.apk$/i.test(asset.name || '') && asset.browser_download_url);
   const asset = apkAssets.find(item => item.name.toUpperCase().includes(expected)) || (apkAssets.length === 1 ? apkAssets[0] : null);
-  if (!asset) throw new Error('正式版本 ' + expected + ' 尚未上传可安装 APK，请联系发布者。');
-  return { updateAvailable: true, version: expected, notes: String(release.body || '').trim(), sizeText: formatSize(asset.size), assetName: asset.name, downloadUrl: asset.browser_download_url, releaseUrl: release.html_url, publishedAt: release.published_at || '' };
+  if (!asset) throw new Error('正式版本 ' + expected + ' 尚未上传 APK 安装包。已留在 POINTS 内，没有打开任何网站。');
+  return { updateAvailable: true, version: expected, notes: String(release.body || '').trim(), sizeText: formatSize(asset.size), size: Number(asset.size || 0), assetName: asset.name, downloadUrl: asset.browser_download_url, releaseUrl: release.html_url, publishedAt: release.published_at || '' };
 }
-export async function downloadUpdate(release) {
-  if (!release?.downloadUrl || !String(release.downloadUrl).startsWith('https://')) throw new Error('APK 下载地址无效。');
-  localStorage.setItem('points.pendingUpdate', JSON.stringify({ version: release.version, notes: release.notes || '', assetName: release.assetName || '', releaseUrl: release.releaseUrl || '', requestedAt: Date.now() }));
-  if (window.Capacitor?.isNativePlatform?.()) await Browser.open({ url: release.downloadUrl });
-  else window.open(release.downloadUrl, '_blank', 'noopener');
+export async function downloadUpdate(release, onProgress = () => {}) {
+  if (!window.Capacitor?.isNativePlatform?.()) throw new Error('应用内 APK 安装仅支持 Android 正式应用环境。');
+  if (!release?.downloadUrl || !String(release.downloadUrl).startsWith('https://') || !/\\.apk$/i.test(release.assetName || '')) throw new Error('官方 APK 文件信息无效，已取消下载。');
+  const path = 'POINTS-' + release.version + '.apk';
+  const target = await Filesystem.getUri({ directory: Directory.Cache, path });
+  onProgress({ phase: 'downloading', percent: 0, message: '正在从官方仓库下载 APK…' });
+  const listener = await FileTransfer.addListener('progress', event => {
+    const total = Number(event.contentLength || release.size || 0);
+    const percent = total > 0 ? Math.min(99, Math.floor(Number(event.bytes || 0) / total * 100)) : 0;
+    onProgress({ phase: 'downloading', percent, message: total > 0 ? '正在下载 APK… ' + percent + '%' : '正在下载官方 APK…' });
+  });
+  try {
+    await Filesystem.deleteFile({ directory: Directory.Cache, path }).catch(() => {});
+    await FileTransfer.downloadFile({ url: release.downloadUrl, path: target.uri, progress: true });
+  } finally {
+    await listener.remove().catch(() => {});
+  }
+  const stat = await Filesystem.stat({ directory: Directory.Cache, path });
+  if (!stat.size || (release.size && Number(stat.size) !== Number(release.size))) {
+    await Filesystem.deleteFile({ directory: Directory.Cache, path }).catch(() => {});
+    throw new Error('APK 文件完整性校验失败，旧版本未受影响，请重新下载。');
+  }
+  const pending = { version: release.version, notes: release.notes || '', assetName: release.assetName, requestedAt: Date.now() };
+  localStorage.setItem('points.pendingUpdate', JSON.stringify(pending));
+  onProgress({ phase: 'installing', percent: 100, message: 'APK 已下载并校验，正在打开 Android 系统安装确认…' });
+  await FileOpener.open({ filePath: target.uri, contentType: 'application/vnd.android.package-archive', openWithDefault: true });
+  return { downloaded: true, path: target.uri };
 }
 export function consumeInstalledUpdate() {
   let pending = null;
