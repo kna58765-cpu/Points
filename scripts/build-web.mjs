@@ -1,4 +1,5 @@
 import { mkdir, copyFile, access } from 'node:fs/promises';
+import { build } from 'esbuild';
 
 await mkdir('www', { recursive: true });
 
@@ -25,3 +26,16 @@ try {
 } catch {
   throw new Error('Missing supabase-config.example.js');
 }
+
+// Bundle the Supabase SDK into the app. Never fetch esm.sh at runtime: that
+// CDN can be unreachable on VPN-free mobile networks and leave the splash stuck.
+await build({
+  entryPoints: ['supabase-cloud.js'],
+  outfile: 'www/supabase-cloud.js',
+  bundle: true,
+  platform: 'browser',
+  format: 'esm',
+  target: ['es2020'],
+  minify: true,
+});
+console.log('Bundled Supabase SDK locally (no runtime CDN request)');
