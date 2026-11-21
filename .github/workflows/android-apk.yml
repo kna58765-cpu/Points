@@ -71,6 +71,12 @@ jobs:
           padding = "=" * (-len(encoded) % 4)
           print(f"Signing secret character count (excluding whitespace): {len(encoded)}")
           print(f"Base64 padding characters restored: {len(padding)}")
+          invalid = [(i + 1, ord(ch)) for i, ch in enumerate(encoded) if ch not in "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/="]
+          if invalid:
+              preview = ", ".join(f"position {i} (character code {code})" for i, code in invalid[:20])
+              raise SystemExit(f"Base64 contains {len(invalid)} invalid non-whitespace character(s): {preview}. Secret contents were not printed.")
+          if len(encoded) % 4 == 1:
+              raise SystemExit("Base64 length is invalid (remainder 1 when divided by 4); this indicates missing or extra content, not missing terminal padding. Secret contents were not printed.")
           try:
               data = base64.b64decode(encoded + padding, validate=True)
           except Exception as exc:
