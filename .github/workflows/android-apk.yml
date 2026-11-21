@@ -151,7 +151,7 @@ jobs:
           p = Path('android/app/build.gradle')
           s = p.read_text()
           s, code_count = re.subn(r"versionCode\s+\d+", "versionCode 75089", s, count=1)
-          s, name_count = re.subn(r"""versionName\s+["'][^"']+["']""", 'versionName "0.88.00"', s, count=1)
+          s, name_count = re.subn(r"""versionName\s+["'][^"']+["']""", 'versionName "T088"', s, count=1)
           if code_count != 1 or name_count != 1:
               raise SystemExit('Could not set Android versionCode/versionName')
           p.write_text(s)
@@ -217,3 +217,8 @@ jobs:
           draft: false
           prerelease: false
           make_latest: true
+
+      - name: Explicitly mark T088 as the latest release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release edit T088 --latest
