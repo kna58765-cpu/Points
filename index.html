@@ -387,9 +387,47 @@ nav button.active{transform:translateY(-1px)}
 @media(prefers-reduced-motion:reduce){}
 
 /* T092: personal account interface */
+
+/* T095 visual polish: calmer hierarchy, consistent spacing, refined account gate */
+:root{--paper:#f5f5f5;--line:#e7e7e7;--ink:#151515;--muted:#858585}
+body{background:radial-gradient(ellipse at 50% -12%,#fff 0%,#f7f7f7 42%,#f3f3f3 100%);color:var(--ink)}
+.app{max-width:1040px}
+header .brand{font-size:23px;letter-spacing:2.7px}
+.app-version{letter-spacing:1.8px;color:#a0a0a0}
+.page-view.active{animation:pageArrive .24s cubic-bezier(.2,.75,.25,1)}
+@keyframes pageArrive{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
+.hero{box-shadow:0 16px 38px rgba(0,0,0,.11),inset 0 1px rgba(255,255,255,.12)}
+.stat,.member,.panel{border-color:rgba(225,225,225,.9);box-shadow:0 4px 18px rgba(0,0,0,.025)}
+.member{transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease}
+@media(hover:hover){.member:hover{transform:translateY(-2px);box-shadow:0 12px 28px rgba(0,0,0,.06);border-color:#dcdcdc}}
+.section-head h2{letter-spacing:-.35px}
+.field{background:rgba(255,255,255,.92);border-color:#e3e3e3;border-radius:15px}
+.field:focus{border-color:#999;box-shadow:0 0 0 4px rgba(20,20,20,.055)}
+.ui-btn,.plain,.outline{font-weight:650}
+.auth-brand{margin-bottom:27px}
+.auth-logo{font-size:64px;letter-spacing:-6px}
+.auth-wordmark{font-size:19px;letter-spacing:5px;margin-top:13px}
+.auth-brand p{font-size:14px;letter-spacing:.04em;color:#888}
+#authGate #cloudAuth{padding:27px!important;border-radius:30px;background:rgba(255,255,255,.91);border-color:#ededed;box-shadow:0 24px 70px rgba(0,0,0,.075),inset 0 1px 0 #fff}
+#authGate .auth-title{font-size:27px;letter-spacing:-1px;line-height:1.25;margin-bottom:8px}
+#authGate .auth-caption{font-size:13px;line-height:1.7;color:#858585;margin-bottom:22px}
+#authGate .field{height:54px;padding:0 16px;margin:0 0 12px;border-radius:16px;background:#f9f9f9;border-color:#ededed}
+#authGate .field:focus{background:#fff;border-color:#bdbdbd}
+#authGate #cloudForm>div[style*="display:flex"]{display:grid!important;grid-template-columns:1fr 1fr;gap:10px!important;margin-top:5px}
+#authGate #cloudSignIn,#authGate #cloudRegister{min-height:52px;font-size:14px;letter-spacing:.01em}
+#authGate #cloudSignIn{box-shadow:0 6px 16px rgba(0,0,0,.11)}
+#authGate #cloudRegister{background:#f7f7f7;border-color:#e8e8e8}
+#authGate .auth-switch{display:block;width:100%;min-height:46px;margin-top:12px;border:1px solid transparent;border-radius:14px;background:transparent;color:#555;font-size:13px;font-weight:650}
+#authGate .auth-switch:active{background:#f5f5f5}
+#authGate #cloudMessage{min-height:20px;font-size:12px;line-height:1.6;margin-top:14px!important;padding:0 2px}
+#authGate .auth-foot{margin-top:24px;color:#aaa;letter-spacing:.4px}
+.auth-password-toggle{width:100%;margin:-2px 0 13px;padding:5px 2px;border:0;background:transparent;text-align:right;color:#777;font-size:12px}
+@media(max-width:480px){body.auth-required #authGate{justify-content:flex-start;padding-top:max(32px,8vh)}.auth-brand{margin-bottom:22px}#authGate #cloudAuth{padding:23px!important;border-radius:26px}#authGate .auth-title{font-size:25px}}
+@media(prefers-reduced-motion:reduce){.page-view.active,.member{animation:none;transition:none}}
+
 </style></head>
 <body class="auth-required"><section id="authGate"><div class="auth-brand"><div class="auth-logo">P<span>.</span></div><div class="auth-wordmark">POINTS</div><p>每一分，都有迹可循。</p></div><div id="authGateSlot"></div><script>document.addEventListener("DOMContentLoaded",function(){var gate=document.getElementById("authGateSlot"),panel=document.getElementById("cloudAuth");if(gate&&panel)gate.appendChild(panel);});</script><div class="auth-foot">邮箱登录 · 个人数据 · 云端同步</div></section><main class="app">
-<header><div><div class="brand">POINTS<span> / SCORE</span></div><div class="app-version">T092</div></div><div class="sub">个人云端同步 · T092</div></header>
+<header><div><div class="brand">POINTS<span> / SCORE</span></div><div class="app-version">T095</div></div><div class="sub">个人云端同步 · T095</div></header>
 <section class="panel" id="cloudAuth" style="padding:18px;margin:0 0 18px">
   <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
     <div><b>邮箱账号</b><div class="muted" id="cloudStatus">尚未登录 · 等待 Supabase 项目配置</div></div>
@@ -548,11 +586,27 @@ formEl.prepend(authCaption);formEl.prepend(authTitle);
 const authSwitch=document.createElement('button');
 authSwitch.type='button';authSwitch.className='auth-switch';authSwitch.textContent='新用户？创建账号';
 formEl.appendChild(authSwitch);
+authSwitch.setAttribute('aria-live','polite');
+nameEl.autocomplete='name';
+emailEl.autocomplete='email';
+passwordEl.autocomplete='current-password';
+const passwordToggle=document.createElement('button');
+passwordToggle.type='button';passwordToggle.className='auth-password-toggle';passwordToggle.textContent='显示密码';
+passwordToggle.setAttribute('aria-label','显示或隐藏密码');
+passwordEl.insertAdjacentElement('afterend',passwordToggle);
+passwordToggle.addEventListener('click',()=>{
+ const reveal=passwordEl.type==='password';passwordEl.type=reveal?'text':'password';
+ passwordToggle.textContent=reveal?'隐藏密码':'显示密码';
+ passwordToggle.setAttribute('aria-pressed',String(reveal));
+});
 
 let authMode='login';
 nameEl.hidden=true;nameEl.style.display='none';
 authSwitch.addEventListener('click',()=>{
  authMode=authMode==='login'?'register':'login';
+ document.getElementById('authGate').classList.toggle('register-mode',authMode==='register');
+ passwordEl.autocomplete=authMode==='register'?'new-password':'current-password';
+ passwordEl.type='password';passwordToggle.textContent='显示密码';passwordToggle.setAttribute('aria-pressed','false');
  nameEl.hidden=authMode!=='register';
  nameEl.style.display=authMode==='register'?'block':'none';
  nameEl.required=authMode==='register';
