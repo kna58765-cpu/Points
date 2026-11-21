@@ -185,3 +185,24 @@ grant execute on function public.undo_score(uuid) to authenticated;
 grant select on public.teams,public.team_members,public.people,public.ledger,public.team_invites,public.audit_events to authenticated;
 grant update,delete on public.people to authenticated;
 -- Enable Realtime for people and ledger in Supabase Database > Publications.
+
+-- Shared team snapshot used by the POINTS Android/web client.
+create table if not exists public.team_state (
+  team_id uuid primary key references public.teams(id) on delete cascade,
+  state jsonb not null default '{}'::jsonb,
+  updated_by uuid not null references auth.users(id),
+  updated_at timestamptz not null default now()
+);
+alter table public.team_state enable row level security;
+drop policy if exists team_state_member_access on public.team_state;
+create policy team_state_member_access on public.team_state
+  for all to authenticated
+  using (public.is_team_member(team_id))
+  with check (public.is_team_member(team_id) and updated_by=auth.uid());
+grant select,insert,update on public.team_state to authenticated;
+
+do $$
+begin
+  alter publication supabase_realtime add table public.team_state;
+exception when duplicate_object then null;
+end $$;
