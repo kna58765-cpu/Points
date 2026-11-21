@@ -8,8 +8,8 @@ const RELEASE_API = 'https://api.github.com/repos/' + REPOSITORY + '/releases?pe
 const T102_01_NOTES = '• 保留总览主页四分之一圆形空间背景与多层景深效果\\n• 优化圆形环带、球体高光与层次感，提升主界面空间氛围\\n• 优化账号页登出按钮视觉层次，采用柔和危险色与立体交互\\n• 明确退出云端账号不会删除本地积分数据，固定签名支持覆盖安装';
 
 function versionNumber(value) {
-  const match = String(value || '').match(/T?(\d+)/i);
-  return match ? Number(match[1]) : 0;
+  const match = String(value || '').match(/T?(\\d+)(?:\\.(\\d+))?/i);
+  return match ? Number(match[1]) * 100 + Number(match[2] || 0) : 0;
 }
 function formatSize(bytes) {
   const n = Number(bytes || 0);
