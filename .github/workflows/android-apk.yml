@@ -63,7 +63,7 @@ jobs:
           test -n "$POINTS_KEY_ALIAS" || { echo "Missing POINTS_KEY_ALIAS repository secret"; exit 1; }
           test -n "$POINTS_KEY_PASSWORD" || { echo "Missing POINTS_KEY_PASSWORD repository secret"; exit 1; }
           echo "$POINTS_KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/points-release-key.jks"
-          echo "POINTS_KEYSTORE_PATH=$RUNNER_TEMP/points-release-key.jks" >> "$GITHUB_ENV"
+          export POINTS_KEYSTORE_PATH="$RUNNER_TEMP/points-release-key.jks"\n          echo "POINTS_KEYSTORE_PATH=$POINTS_KEYSTORE_PATH" >> "$GITHUB_ENV"
           python3 - <<'PY'
           from pathlib import Path
           import re
