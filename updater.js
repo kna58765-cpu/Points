@@ -56,9 +56,15 @@ export async function downloadUpdate(release, onProgress = () => {}) {
   }
   const pending = { version: release.version, notes: release.notes || '', assetName: release.assetName, requestedAt: Date.now() };
   localStorage.setItem('points.pendingUpdate', JSON.stringify(pending));
-  onProgress({ phase: 'installing', percent: 100, message: 'APK 已下载并校验，正在打开 Android 系统安装确认…' });
-  await FileOpener.open({ filePath: target.uri, contentType: 'application/vnd.android.package-archive', openWithDefault: true });
-  return { downloaded: true, path: target.uri };
+  onProgress({ phase: 'install_requested', percent: 100, message: 'APK 已下载并校验，正在打开 Android 安装器…' });
+  try {
+    await FileOpener.open({ filePath: target.uri, contentType: 'application/vnd.android.package-archive', openWithDefault: true });
+  } catch (error) {
+    localStorage.removeItem('points.pendingUpdate');
+    throw new Error('无法打开 Android 安装器。请检查系统是否允许安装此应用下载的 APK，然后重试。');
+  }
+  onProgress({ phase: 'install_requested', percent: 100, message: '已请求打开 Android 安装器，请在系统弹窗中点击「更新」完成安装。' });
+  return { downloaded: true, path: target.uri, installRequested: true };
 }
 export function consumeInstalledUpdate() {
   let pending = null;
@@ -66,7 +72,6 @@ export function consumeInstalledUpdate() {
   const installed = localStorage.getItem('points.installedVersion') || '';
   let info = null;
   if (pending?.version === APP_VERSION) info = pending;
-  else if (!installed && APP_VERSION === 'T077') info = { version: APP_VERSION, notes: T077_NOTES };
   else if (installed && installed !== APP_VERSION) info = { version: APP_VERSION, notes: T077_NOTES };
   localStorage.removeItem('points.pendingUpdate');
   localStorage.setItem('points.installedVersion', APP_VERSION);
