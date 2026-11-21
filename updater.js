@@ -4,7 +4,7 @@ import { FileOpener } from '@capacitor-community/file-opener';
 
 const APP_VERSION = 'T092';
 const REPOSITORY = 'kna58765-cpu/Points';
-const RELEASE_API = 'https://api.github.com/repos/' + REPOSITORY + '/releases/latest';
+const RELEASE_API = 'https://api.github.com/repos/' + REPOSITORY + '/releases?per_page=10';
 const T092_NOTES = '• 移除团队、邀请码和团队协作入口\\n• 仅保留邮箱注册与邮箱登录\\n• 积分数据迁移为个人账号独立云同步\\n• 保留已有成员、积分、流水和设置\\n• 保持原固定签名，支持覆盖安装并保留数据';
 
 function versionNumber(value) {
@@ -19,8 +19,9 @@ export async function checkForUpdate() {
   const response = await fetch(RELEASE_API, { headers: { Accept: 'application/vnd.github+json' }, cache: 'no-store' });
   if (response.status === 404) throw new Error('官方还没有发布正式版本，请稍后再检查。');
   if (!response.ok) throw new Error('GitHub 暂时无法访问（' + response.status + '），请稍后重试。');
-  const release = await response.json();
-  if (release.draft || release.prerelease) throw new Error('当前版本不是正式发布版，已忽略。');
+  const releases = await response.json();
+  const release = Array.isArray(releases) ? releases.find(item => !item.draft && !item.prerelease) : null;
+  if (!release) throw new Error('仓库中暂时没有正式发布版，请稍后再检查。');
   const tag = String(release.tag_name || release.name || '');
   const latestNumber = versionNumber(tag);
   const currentNumber = versionNumber(APP_VERSION);
