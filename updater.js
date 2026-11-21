@@ -2,10 +2,10 @@ import { FileTransfer } from '@capacitor/file-transfer';
 import { Filesystem, Directory } from '@capacitor/filesystem';
 import { FileOpener } from '@capacitor-community/file-opener';
 
-const APP_VERSION = 'T083';
+const APP_VERSION = 'T084';
 const REPOSITORY = 'kna58765-cpu/Points';
 const RELEASE_API = 'https://api.github.com/repos/' + REPOSITORY + '/releases/latest';
-const T083_NOTES = '• 修复 Android APK 安装器启动流程\\n• 增加安装未知应用权限声明\\n• 保持原固定签名，覆盖安装并保留数据';
+const T084_NOTES = '• 修复 Android APK 安装器启动流程\\n• 增加安装未知应用权限声明\\n• 保持原固定签名，覆盖安装并保留数据';
 
 function versionNumber(value) {
   const match = String(value || '').match(/T?(\d+)/i);
@@ -78,7 +78,7 @@ export function consumeInstalledUpdate() {
   if (installed && installed !== APP_VERSION) {
     info = pending?.version === APP_VERSION
       ? pending
-      : { version: APP_VERSION, notes: T083_NOTES };
+      : { version: APP_VERSION, notes: T084_NOTES };
   }
 
   // A cancelled installation must not leave a stale "pending" success notice.
