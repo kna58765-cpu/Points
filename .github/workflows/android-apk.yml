@@ -150,7 +150,7 @@ jobs:
           import re
           p = Path('android/app/build.gradle')
           s = p.read_text()
-          s, code_count = re.subn(r"versionCode\s+\d+", "versionCode 75086", s, count=1)
+          s, code_count = re.subn(r"versionCode\s+\d+", "versionCode 75087", s, count=1)
           s, name_count = re.subn(r"""versionName\s+["'][^"']+["']""", 'versionName "T086"', s, count=1)
           if code_count != 1 or name_count != 1:
               raise SystemExit('Could not set Android versionCode/versionName')
@@ -195,6 +195,11 @@ jobs:
         with:
           name: POINTS-T086-Android-APK
           path: release-assets
+
+      - name: Replace previous T086 APK asset
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release delete-asset T086 POINTS-T086.apk --yes || true
 
       - name: Publish T086 release with APK
         uses: softprops/action-gh-release@v2
