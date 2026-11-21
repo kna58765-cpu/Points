@@ -2,10 +2,10 @@ import { FileTransfer } from '@capacitor/file-transfer';
 import { Filesystem, Directory } from '@capacitor/filesystem';
 import { FileOpener } from '@capacitor-community/file-opener';
 
-const APP_VERSION = 'T102.03';
+const APP_VERSION = 'T102.04';
 const REPOSITORY = 'kna58765-cpu/Points';
 const RELEASE_API = 'https://api.github.com/repos/' + REPOSITORY + '/releases?per_page=10';
-const T102_03_NOTES = '• 移除橙色主题，改为银白、雾灰与低饱和冷色光感\\n• 统一卡片、按钮、导航和弹窗的中性毛玻璃材质\\n• 优化首页空间背景层次、柔和高光与视觉对比\\n• 保留清晰的深色主按钮和舒适的移动端触控反馈\\n• 保留固定签名，支持覆盖安装并保留本地积分数据';
+const T102_04_NOTES = '• 按钮文字与图标间距收紧，统一居中排版和左右留白\\n• 统一卡片、按钮、导航和弹窗的中性毛玻璃材质\\n• 优化首页空间背景层次、柔和高光与视觉对比\\n• 保留清晰的深色主按钮和舒适的移动端触控反馈\\n• 保留固定签名，支持覆盖安装并保留本地积分数据';
 
 function versionNumber(value) {
   const match = String(value || '').match(/T?(\d+)(?:\.(\d+))?/i);

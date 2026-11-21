@@ -734,9 +734,35 @@ nav button.active{
  .stat,.panel,.member,nav,.modal,.control-menu{backdrop-filter:none!important;background:#fff!important}
 }
 
+
+/* T102.04 button typography: bring labels into the button body */
+button,.ui-btn,.control-select>button{
+ display:inline-flex;
+ align-items:center;
+ justify-content:center;
+ gap:6px;
+ text-align:center;
+ line-height:1.2;
+ letter-spacing:0;
+ vertical-align:middle;
+}
+.plain,.outline,.ui-btn,.actions button,.modal-actions button,
+.account-logout-button,.control-option,nav button{
+ padding-left:12px!important;
+ padding-right:12px!important;
+}
+.actions button{gap:5px;white-space:nowrap}
+nav button{gap:4px;padding-left:7px!important;padding-right:7px!important}
+.account-logout-button{gap:8px}
+.modal-actions button{gap:6px}
+button>span,button>svg,.ui-btn>span,.ui-btn>svg{flex:0 0 auto}
+@media(max-width:380px){
+ .plain,.outline,.ui-btn,.actions button,.modal-actions button{padding-left:9px!important;padding-right:9px!important}
+ nav button{padding-left:5px!important;padding-right:5px!important;font-size:10.5px}
+}
 </style>
 <body class="auth-required"><section id="authGate"><div class="auth-brand"><div class="auth-logo">P<span>.</span></div><div class="auth-wordmark">POINTS</div><p>每一分，都有迹可循。</p></div><div id="authGateSlot"></div><script>document.addEventListener("DOMContentLoaded",function(){var gate=document.getElementById("authGateSlot"),panel=document.getElementById("cloudAuth");if(gate&&panel)gate.appendChild(panel);});</script><div class="auth-foot">邮箱登录 · 个人数据 · 云端同步</div></section><main class="app">
-<header><div><div class="brand">POINTS<span> / SCORE</span></div><div class="app-version">T102.03</div></div><div class="sub">个人云端同步 · T102.03</div></header>
+<header><div><div class="brand">POINTS<span> / SCORE</span></div><div class="app-version">T102.04</div></div><div class="sub">个人云端同步 · T102.04</div></header>
 <section class="panel" id="cloudAuth" style="padding:18px;margin:0 0 18px">
   <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
     <div><b>邮箱账号</b><div class="muted" id="cloudStatus">尚未登录 · 等待 Supabase 项目配置</div></div>
@@ -786,7 +812,7 @@ nav button.active{
    </div>
   </div>
   <button class="plain ui-btn primary update-check-button" id="accountCheckUpdate" type="button">检查更新</button>
-  <div id="updateStatus" class="update-status-box" role="status">当前版本 T102.03。检查 GitHub 官方正式版；下载后由安卓系统确认覆盖安装，无需卸载。</div>
+  <div id="updateStatus" class="update-status-box" role="status">当前版本 T102.04。检查 GitHub 官方正式版；下载后由安卓系统确认覆盖安装，无需卸载。</div>
   <section id="updateResult" hidden class="update-release-card">
    <div class="update-release-top">
     <div><span class="update-release-label">正式版本</span><b id="updateVersion">发现新版本</b></div>
@@ -812,7 +838,7 @@ nav button.active{
 <section class="page-view" data-view="audit"><div class="section-head"><h2>操作记录</h2><span class="sub">最近 50 条</span></div><section class="panel" id="auditHistory"></section></section>
 </main>
 <nav id="mainNav"><button class="active" type="button" data-page="overview">◉ 总览</button><button type="button" data-page="rank">▤ 排行</button><button type="button" data-page="members">♙ 成员</button><button type="button" data-page="history">≡ 流水</button><button type="button" data-page="audit">≡ 操作</button><button type="button" data-page="account">◎ 账号</button></nav>
-<aside id="updateToast" aria-live="polite" aria-atomic="true"><div class="update-toast-head"><span class="update-toast-check">✓</span><div><b>更新完成</b><small id="updateToastVersion">POINTS T102.03 已成功安装</small></div><button type="button" id="updateToastClose" aria-label="关闭">×</button></div><div class="update-toast-label">本次更新内容</div><div id="updateToastNotes"></div></aside>
+<aside id="updateToast" aria-live="polite" aria-atomic="true"><div class="update-toast-head"><span class="update-toast-check">✓</span><div><b>更新完成</b><small id="updateToastVersion">POINTS T102.04 已成功安装</small></div><button type="button" id="updateToastClose" aria-label="关闭">×</button></div><div class="update-toast-label">本次更新内容</div><div id="updateToastNotes"></div></aside>
 <div class="modal-bg" id="modal"><div class="modal"><h3 id="modalTitle">添加成员</h3><label class="sub">成员名称</label><input class="field" id="nameInput" maxlength="24" placeholder="输入成员名称"><label class="sub" id="groupLabel">所属分组</label><input class="field" id="groupInput" maxlength="20" placeholder="例如：一班、二班、管理员组"><label class="sub hide" id="colorLabel">头像颜色</label><select class="field hide" id="colorInput"><option value="#111111">黑色</option><option value="#555555">深灰</option><option value="#777777">灰色</option><option value="#9a9a9a">浅灰</option><option value="#333333">炭黑</option></select><label class="sub" id="amountLabel">积分数值</label><input class="field" id="amountInput" type="number" min="1" max="99999" placeholder="例如 10"><label class="sub hide" id="noteLabel">备注（选填）</label><input class="field hide" id="noteInput" maxlength="80" placeholder="例如：完成任务、迟到"><div class="modal-actions"><button class="outline" id="deleteMember" style="display:none">删除成员</button><button class="outline" id="cancel">取消</button><button class="plain" id="confirm">确认</button></div></div></div>
 <div class="modal-bg" id="detailModal"><div class="modal" style="max-height:85dvh;overflow:auto"><div style="display:flex;justify-content:space-between"><h3 id="detailName">成员详情</h3><button class="outline" id="closeDetail">关闭</button></div><div class="hero" style="margin:8px 0 14px;padding:20px"><div><small>MEMBER TOTAL POINTS</small><div class="total" id="detailPoints">0</div></div></div><div class="stats"><div class="stat"><label>累计加分</label><strong id="detailEarned">0</strong></div><div class="stat"><label>累计扣分</label><strong id="detailSpent">0</strong></div><div class="stat"><label>记录次数</label><strong id="detailCount">0</strong></div></div><div class="section-head"><h2>全部积分记录</h2></div><section class="panel" id="detailHistory"></section></div></div><script>
 const KEY='points-v1';let data=JSON.parse(localStorage.getItem(KEY)||'null')||{members:[],logs:[]};data.settings=Object.assign({maxAdd:99999,maxDeduct:99999},data.settings||{});data.audit=Array.isArray(data.audit)?data.audit:[];let mode='member',target=null;let adminMode=true;

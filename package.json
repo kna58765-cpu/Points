@@ -1,6 +1,6 @@
 {
   "name": "points-android",
-  "version": "1.02.3",
+  "version": "1.02.4",
   "private": true,
   "description": "POINTS Android app built with Capacitor",
   "scripts": {
