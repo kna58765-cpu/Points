@@ -5,7 +5,7 @@ import { FileOpener } from '@capacitor-community/file-opener';
 const APP_VERSION = 'T083';
 const REPOSITORY = 'kna58765-cpu/Points';
 const RELEASE_API = 'https://api.github.com/repos/' + REPOSITORY + '/releases/latest';
-const T083_NOTES = '• 应用内版本号与正式 APK 统一为 T082\n• 修复团队邀请码生成后不可见的问题，支持直接复制分享\n• 修复手动检查更新与安装状态提示\n• 保持原固定签名，覆盖安装并保留数据';
+const T083_NOTES = '• 修复 Android APK 安装器启动流程\\n• 增加安装未知应用权限声明\\n• 保持原固定签名，覆盖安装并保留数据';
 
 function versionNumber(value) {
   const match = String(value || '').match(/T?(\d+)/i);
@@ -61,7 +61,7 @@ export async function downloadUpdate(release, onProgress = () => {}) {
     await FileOpener.open({ filePath: target.uri, contentType: 'application/vnd.android.package-archive', openWithDefault: true });
   } catch (error) {
     localStorage.removeItem('points.pendingUpdate');
-    throw new Error('无法打开 Android 安装器。请检查系统是否允许安装此应用下载的 APK，然后重试。');
+    throw new Error('无法打开 Android 安装器。请到系统设置中允许 POINTS「安装未知应用」，然后返回重试。');
   }
   onProgress({ phase: 'install_requested', percent: 100, message: '已请求打开 Android 安装器，请在系统弹窗中点击「更新」完成安装。' });
   return { downloaded: true, path: target.uri, installRequested: true };
@@ -78,7 +78,7 @@ export function consumeInstalledUpdate() {
   if (installed && installed !== APP_VERSION) {
     info = pending?.version === APP_VERSION
       ? pending
-      : { version: APP_VERSION, notes: T082_NOTES };
+      : { version: APP_VERSION, notes: T083_NOTES };
   }
 
   // A cancelled installation must not leave a stale "pending" success notice.
