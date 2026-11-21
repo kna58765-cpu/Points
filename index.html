@@ -257,6 +257,14 @@ body.auth-required #authGate{display:flex;position:fixed;inset:0;z-index:100;bac
 #accountDelete{font-weight:750}.page-view[data-view="account"] .panel{box-shadow:0 3px 14px #00000004}
 @media(prefers-reduced-motion:reduce){#updateToast.show,#updateToast.hide{animation:none}#updateToast.show{opacity:1;visibility:visible;transform:translate(-50%,0)}}
 
+
+/* T076 team invitation card */
+.invite-card{margin-top:14px;padding:17px;border:1px solid #e7e7e7;border-radius:20px;background:linear-gradient(145deg,#fff,#f7f7f7);box-shadow:0 8px 24px rgba(0,0,0,.045)}
+.invite-card[hidden]{display:none!important}
+.invite-card-label{font-size:12px;color:#777;font-weight:700;letter-spacing:.6px}
+.invite-code{margin-top:9px;padding:15px 12px;border:1px dashed #cfcfcf;border-radius:15px;background:#fff;text-align:center;font-size:clamp(24px,7vw,32px);font-weight:900;letter-spacing:3px;font-variant-numeric:tabular-nums;overflow-wrap:anywhere;user-select:all}
+.invite-meta{margin-top:9px;color:#888;font-size:12px;text-align:center}
+.invite-copy{width:100%;margin-top:13px;min-height:48px}
 </style></head>
 <body class="auth-required"><section id="authGate"><div class="auth-brand"><div class="auth-logo">P<span>.</span></div><div class="auth-wordmark">POINTS</div><p>每一分，都有迹可循。</p></div><div id="authGateSlot"></div><script>document.addEventListener("DOMContentLoaded",function(){var gate=document.getElementById("authGateSlot"),panel=document.getElementById("cloudAuth");if(gate&&panel)gate.appendChild(panel);});</script><div class="auth-foot">安全登录 · 团队协作 · 实时积分</div></section><main class="app">
 <header><div><div class="brand">POINTS<span> / SCORE</span></div><div class="app-version">T075</div></div><div class="sub">Supabase 云端同步 · T075</div></header>
@@ -282,9 +290,13 @@ body.auth-required #authGate{display:flex;position:fixed;inset:0;z-index:100;bac
       <button class="outline" id="cloudJoinTeam" type="button">加入团队</button>
       <button class="plain" id="cloudMakeInvite" type="button" hidden>生成邀请码</button>
       <button class="outline" id="cloudDissolveTeam" type="button" hidden style="background:#fff0f0;border:1px solid #e5484d;color:#d92d35;font-weight:800">解散团队</button>
-      <button class="outline" id="cloudCopyInvite" type="button" hidden>复制邀请码</button>
     </div>
-    <div class="muted" id="cloudInviteResult" style="margin-top:9px;word-break:break-all"></div>
+    <div id="cloudInviteResult" class="invite-card" hidden>
+      <div class="invite-card-label">已生成的邀请码</div>
+      <div class="invite-code" id="cloudInviteValue">------</div>
+      <div class="invite-meta" id="cloudInviteMeta">最多 30 人使用 · 有效期 7 天</div>
+      <button class="plain ui-btn primary invite-copy" id="cloudCopyInvite" type="button" hidden>复制邀请码</button>
+    </div>
   </div>
   <div class="muted" id="cloudMessage" role="status" style="margin-top:10px">POINTS 正在从 Appwrite 迁移到 Supabase。账号与积分同步分阶段启用。</div>
 </section>
@@ -514,20 +526,25 @@ const inviteBtn=document.getElementById('cloudMakeInvite');
 const copyInviteBtn=document.getElementById('cloudCopyInvite');
 const dissolveTeamBtn=document.getElementById('cloudDissolveTeam');
 let generatedInviteCode='';
+function renderInviteCode(code){
+ generatedInviteCode=String(code||'').trim().toUpperCase();
+ inviteResult.hidden=!generatedInviteCode;
+ const value=document.getElementById('cloudInviteValue');
+ const meta=document.getElementById('cloudInviteMeta');
+ if(value)value.textContent=generatedInviteCode||'------';
+ if(meta)meta.textContent='最多 30 人使用 · 有效期 7 天';
+ copyInviteBtn.hidden=!generatedInviteCode;
+}
 function restoreSavedInvite(teamId){
  const key='points-invite-'+teamId;
  try{
   const saved=JSON.parse(localStorage.getItem(key)||'null');
   if(saved?.code&&Number(saved.createdAt)>0&&Date.now()-Number(saved.createdAt)<7*24*60*60*1000){
-   generatedInviteCode=String(saved.code);
-   inviteResult.textContent='当前邀请码：'+generatedInviteCode+'（最多 30 人使用，有效期 7 天）';
-   copyInviteBtn.hidden=false;
+   renderInviteCode(saved.code);
    return;
   }
  }catch(e){}
- generatedInviteCode='';
- inviteResult.textContent='';
- copyInviteBtn.hidden=true;
+ renderInviteCode('');
  localStorage.removeItem(key);
 }
 let activeTeamId=localStorage.getItem('points-cloud-team')||'';
@@ -629,7 +646,7 @@ downloadUpdate?.addEventListener('click',async()=>{
 createTeamBtn.addEventListener('click',async()=>{
  if(!cloudApi?.cloudReady||!activeUserId)return showMessage('请先登录云端账号。',true);
  const name=prompt('请输入团队名称');if(!name?.trim())return;
- try{const id=await cloudApi.createTeam(name.trim());await activateTeam(id,false,'owner',name.trim());inviteResult.textContent='团队创建成功。点击「生成邀请码」邀请成员。'}
+ try{const id=await cloudApi.createTeam(name.trim());await activateTeam(id,false,'owner',name.trim());renderInviteCode('');showMessage('团队创建成功。点击「生成邀请码」邀请成员。')}
  catch(e){showMessage('创建团队失败：'+errorText(e),true)}
 });
 dissolveTeamBtn.addEventListener('click',async()=>{
@@ -643,7 +660,7 @@ dissolveTeamBtn.addEventListener('click',async()=>{
   localStorage.removeItem('points-invite-'+activeTeamId);
   localStorage.removeItem('points-cloud-team');
   activeTeamId='';activeTeamRole='member';activeTeamName='';generatedInviteCode='';
-  inviteResult.textContent='';inviteBtn.hidden=true;copyInviteBtn.hidden=true;dissolveTeamBtn.hidden=true;
+  renderInviteCode('');inviteBtn.hidden=true;dissolveTeamBtn.hidden=true;
   createTeamBtn.hidden=false;joinTeamBtn.hidden=false;inviteInput.hidden=false;
   teamControls.hidden=false;
   const auth=document.getElementById('cloudAuth');if(auth&&teamControls.parentElement!==auth)auth.appendChild(teamControls);
@@ -657,13 +674,13 @@ dissolveTeamBtn.addEventListener('click',async()=>{
 joinTeamBtn.addEventListener('click',async()=>{
  if(!cloudApi?.cloudReady||!activeUserId)return showMessage('请先登录云端账号。',true);
  const code=inviteInput.value.trim();if(!code)return showMessage('请先输入邀请码。',true);
- try{const id=await cloudApi.acceptInvite(code);await activateTeam(id,true);inviteInput.value='';inviteResult.textContent='已成功加入团队。'}
+ try{const id=await cloudApi.acceptInvite(code);await activateTeam(id,true);inviteInput.value='';renderInviteCode('');}
  catch(e){showMessage('加入团队失败：'+errorText(e),true)}
 });
 inviteBtn.addEventListener('click',async()=>{
  if(!activeTeamId)return;
  inviteBtn.disabled=true;inviteBtn.textContent='正在生成…';
- try{const code=await cloudApi.createInvite(activeTeamId,30);generatedInviteCode=String(code);localStorage.setItem('points-invite-'+activeTeamId,JSON.stringify({code:generatedInviteCode,createdAt:Date.now()}));inviteResult.hidden=false;inviteResult.style.display='block';inviteResult.textContent='当前邀请码：'+generatedInviteCode+'（最多 30 人使用，有效期 7 天）';copyInviteBtn.hidden=false;showPage('team');inviteResult.scrollIntoView({behavior:'smooth',block:'center'});showMessage('邀请码已生成并保存。');window.alert('POINTS 邀请码：\\n\\n'+generatedInviteCode+'\\n\\n最多 30 人使用，有效期 7 天。')}
+ try{const code=await cloudApi.createInvite(activeTeamId,30);renderInviteCode(code);localStorage.setItem('points-invite-'+activeTeamId,JSON.stringify({code:generatedInviteCode,createdAt:Date.now()}));showPage('team');inviteResult.scrollIntoView({behavior:'smooth',block:'center'});showMessage('邀请码已生成，可直接复制并发送给成员。')}
  catch(e){showMessage('生成邀请码失败：'+errorText(e),true)}
  finally{inviteBtn.disabled=false;inviteBtn.textContent='生成邀请码'}
 });
