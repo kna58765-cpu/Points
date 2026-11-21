@@ -103,7 +103,7 @@ returns boolean
 language plpgsql
 security definer
 set search_path = public
-as $
+as $$
 begin
   if auth.uid() is null then
     raise exception '请先登录';
@@ -117,7 +117,7 @@ begin
   delete from public.teams where id = p_team_id;
   return true;
 end;
-$;
+$$;
 
 create or replace function public.create_team_invite(p_team_id uuid,p_max_uses integer default 20)
 returns text language plpgsql security definer set search_path=public
