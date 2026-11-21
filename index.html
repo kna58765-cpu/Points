@@ -753,25 +753,36 @@ function restoreSavedInvite(teamId){
  localStorage.removeItem(key);
  return false;
 }
+let inviteGenerationPromise=null;
 async function rotateInviteIfDue(force=false){
  if(!activeTeamId||!cloudApi?.cloudReady||!activeUserId)return;
  if(!['owner','admin'].includes(activeTeamRole))return;
  if(!force&&generatedInviteCode&&Date.now()-generatedInviteAt<INVITE_ROTATION_MS)return;
- if(inviteBtn.dataset.generating==='1')return;
+ if(inviteGenerationPromise)return inviteGenerationPromise;
  inviteBtn.dataset.generating='1';
+ inviteBtn.disabled=true;
  const value=document.getElementById('cloudInviteValue');
  if(!generatedInviteCode&&value)value.textContent='正在自动生成…';
- try{
-  const result=await cloudApi.createInvite(activeTeamId,30);
-  const code=extractInviteCode(result);
-  if(!code)throw new Error('云端没有返回有效邀请码');
-  renderInviteCode(code,Date.now());
-  localStorage.setItem('points-invite-'+activeTeamId,JSON.stringify({code:generatedInviteCode,createdAt:generatedInviteAt}));
-  showMessage('团队邀请码已自动更新。');
- }catch(error){
-  if(!generatedInviteCode&&value)value.textContent='自动生成失败，稍后重试';
-  showMessage('邀请码自动生成失败：'+errorText(error),true);
- }finally{delete inviteBtn.dataset.generating;}
+ inviteGenerationPromise=(async()=>{
+  try{
+   const result=await cloudApi.createInvite(activeTeamId,30);
+   const code=extractInviteCode(result);
+   if(!code)throw new Error('云端没有返回有效邀请码');
+   renderInviteCode(code,Date.now());
+   localStorage.setItem('points-invite-'+activeTeamId,JSON.stringify({code:generatedInviteCode,createdAt:generatedInviteAt}));
+   showMessage('团队邀请码已生成：'+generatedInviteCode);
+   return generatedInviteCode;
+  }catch(error){
+   if(!generatedInviteCode&&value)value.textContent='自动生成失败，点击重试';
+   showMessage('邀请码生成失败：'+errorText(error),true);
+   throw error;
+  }finally{
+   inviteBtn.disabled=false;
+   delete inviteBtn.dataset.generating;
+   inviteGenerationPromise=null;
+  }
+ })();
+ return inviteGenerationPromise;
 }
 function startInviteRotation(){
  if(inviteRotationTimer){clearInterval(inviteRotationTimer);inviteRotationTimer=null;}
@@ -886,8 +897,16 @@ downloadUpdate?.addEventListener('click',async()=>{
 createTeamBtn.addEventListener('click',async()=>{
  if(!cloudApi?.cloudReady||!activeUserId)return showMessage('请先登录云端账号。',true);
  const name=prompt('请输入团队名称');if(!name?.trim())return;
- try{const id=await cloudApi.createTeam(name.trim());await activateTeam(id,false,'owner',name.trim());renderInviteCode('');showMessage('团队创建成功。点击「生成邀请码」邀请成员。')}
- catch(e){showMessage('创建团队失败：'+errorText(e),true)}
+ try{
+  const id=await cloudApi.createTeam(name.trim());
+  await activateTeam(id,false,'owner',name.trim());
+  // activateTeam starts automatic invite creation; join the same request instead
+  // of clearing its result or accidentally issuing a duplicate RPC.
+  await rotateInviteIfDue();
+  showMessage(generatedInviteCode?'团队创建成功，邀请码已生成。':'团队创建成功，但邀请码尚未生成，请点击邀请码按钮重试。');
+ }catch(e){
+  showMessage('团队创建/邀请码生成失败：'+errorText(e),true);
+ }
 });
 dissolveTeamBtn.addEventListener('click',async()=>{
  if(!activeTeamId||activeTeamRole!=='owner')return showMessage('只有团队创建者可以解散团队。',true);
