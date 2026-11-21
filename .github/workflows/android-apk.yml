@@ -124,7 +124,7 @@ jobs:
           if pos < 0:
               raise SystemExit('Gradle buildTypes block not found after signing setup')
           insert = pos + len('buildTypes {')
-          s = s[:insert] + '\\n        debug { signingConfig signingConfigs.release }' + s[insert:]
+          s = s[:insert] + '\n        debug { signingConfig signingConfigs.release }' + s[insert:]
           p.write_text(s)
           PY
           STORE_TYPE="$(cat "$RUNNER_TEMP/points-keystore-type")"
