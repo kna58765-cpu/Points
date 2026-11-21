@@ -2,10 +2,10 @@ import { FileTransfer } from '@capacitor/file-transfer';
 import { Filesystem, Directory } from '@capacitor/filesystem';
 import { FileOpener } from '@capacitor-community/file-opener';
 
-const APP_VERSION = 'T086';
+const APP_VERSION = 'T087';
 const REPOSITORY = 'kna58765-cpu/Points';
 const RELEASE_API = 'https://api.github.com/repos/' + REPOSITORY + '/releases/latest';
-const T086_NOTES = '• 修复生成邀请码后不明显的问题，生成后立即弹出邀请码展示窗口\\n• 优化邀请码复制与再次查看体验\\n• 更新成功提示与下载进度动画更柔和舒适\\n• 保持原固定签名，覆盖安装并保留数据';
+const T087_NOTES = '• 修复生成邀请码后不明显的问题，生成后立即弹出邀请码展示窗口\\n• 优化邀请码复制与再次查看体验\\n• 更新成功提示与下载进度动画更柔和舒适\\n• 保持原固定签名，覆盖安装并保留数据';
 
 function versionNumber(value) {
   const match = String(value || '').match(/T?(\d+)/i);
@@ -78,7 +78,7 @@ export function consumeInstalledUpdate() {
   if (installed && installed !== APP_VERSION) {
     info = pending?.version === APP_VERSION
       ? pending
-      : { version: APP_VERSION, notes: T086_NOTES };
+      : { version: APP_VERSION, notes: T087_NOTES };
   }
 
   // A cancelled installation must not leave a stale "pending" success notice.
