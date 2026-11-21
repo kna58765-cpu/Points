@@ -66,11 +66,13 @@ jobs:
           import base64, hashlib, os, re
           from pathlib import Path
           raw = os.environ["POINTS_KEYSTORE_BASE64"]
-          # Remove only harmless line wrapping. Do not repair, trim, or rewrite data.
-          encoded = re.sub(r"\\s+", "", raw)
+          # Remove whitespace only; restore omitted terminal Base64 padding without changing payload characters.
+          encoded = re.sub(r"\s+", "", raw)
+          padding = "=" * (-len(encoded) % 4)
           print(f"Signing secret character count (excluding whitespace): {len(encoded)}")
+          print(f"Base64 padding characters restored: {len(padding)}")
           try:
-              data = base64.b64decode(encoded, validate=True)
+              data = base64.b64decode(encoded + padding, validate=True)
           except Exception as exc:
               raise SystemExit(f"Strict Base64 decoding failed ({type(exc).__name__}). Secret contents were not printed.")
           header = data[:8].hex()
