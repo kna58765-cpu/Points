@@ -732,7 +732,7 @@ let generatedInviteAt=0;
 function renderInviteCode(code,createdAt=Date.now()){
  generatedInviteCode=extractInviteCode(code).toUpperCase();
  generatedInviteAt=generatedInviteCode?(Number(createdAt)||Date.now()):0;
- inviteBtn.hidden=!activeTeamId;
+ inviteBtn.hidden=!activeTeamId||!['owner','admin'].includes(activeTeamRole);
  inviteBtn.disabled=false;
  const value=document.getElementById('cloudInviteValue');
  const meta=document.getElementById('cloudInviteMeta');
@@ -755,6 +755,7 @@ function restoreSavedInvite(teamId){
 }
 async function rotateInviteIfDue(force=false){
  if(!activeTeamId||!cloudApi?.cloudReady||!activeUserId)return;
+ if(!['owner','admin'].includes(activeTeamRole))return;
  if(!force&&generatedInviteCode&&Date.now()-generatedInviteAt<INVITE_ROTATION_MS)return;
  if(inviteBtn.dataset.generating==='1')return;
  inviteBtn.dataset.generating='1';
@@ -768,12 +769,17 @@ async function rotateInviteIfDue(force=false){
   localStorage.setItem('points-invite-'+activeTeamId,JSON.stringify({code:generatedInviteCode,createdAt:generatedInviteAt}));
   showMessage('团队邀请码已自动更新。');
  }catch(error){
-  if(!generatedInviteCode&&value)value.textContent='暂时无法生成，请检查网络';
-  showMessage('邀请码自动更新失败：'+errorText(error),true);
+  if(!generatedInviteCode&&value)value.textContent='自动生成失败，稍后重试';
+  showMessage('邀请码自动生成失败：'+errorText(error),true);
  }finally{delete inviteBtn.dataset.generating;}
 }
 function startInviteRotation(){
- if(inviteRotationTimer)clearInterval(inviteRotationTimer);
+ if(inviteRotationTimer){clearInterval(inviteRotationTimer);inviteRotationTimer=null;}
+ if(!['owner','admin'].includes(activeTeamRole)){
+  inviteBtn.hidden=true;
+  return;
+ }
+ inviteBtn.hidden=false;
  rotateInviteIfDue();
  inviteRotationTimer=setInterval(()=>rotateInviteIfDue(),60*1000);
 }
