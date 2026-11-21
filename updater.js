@@ -2,10 +2,10 @@ import { FileTransfer } from '@capacitor/file-transfer';
 import { Filesystem, Directory } from '@capacitor/filesystem';
 import { FileOpener } from '@capacitor-community/file-opener';
 
-const APP_VERSION = 'T080';
+const APP_VERSION = 'T081';
 const REPOSITORY = 'kna58765-cpu/Points';
 const RELEASE_API = 'https://api.github.com/repos/' + REPOSITORY + '/releases/latest';
-const T080_NOTES = '• 修复上一代更新流程遗留问题\n• 只有实际安装新版本后才显示更新完成动画\n• 取消安装不会误报成功\n• 统一固定 APK 签名，支持后续覆盖更新';
+const T081_NOTES = '• 修复更新包签名校验与下载完整性检查\\n• 保持固定签名，支持后续版本覆盖更新\\n• 优化更新状态提示，避免将下载或打开安装器误报为安装成功\\n• 修复上一代更新流程中的边界问题';
 
 function versionNumber(value) {
   const match = String(value || '').match(/T?(\d+)/i);
@@ -78,7 +78,7 @@ export function consumeInstalledUpdate() {
   if (installed && installed !== APP_VERSION) {
     info = pending?.version === APP_VERSION
       ? pending
-      : { version: APP_VERSION, notes: T080_NOTES };
+      : { version: APP_VERSION, notes: T081_NOTES };
   }
 
   // A cancelled installation must not leave a stale "pending" success notice.
