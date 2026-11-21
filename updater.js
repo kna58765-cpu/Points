@@ -5,7 +5,7 @@ import { FileOpener } from '@capacitor-community/file-opener';
 const APP_VERSION = 'T081';
 const REPOSITORY = 'kna58765-cpu/Points';
 const RELEASE_API = 'https://api.github.com/repos/' + REPOSITORY + '/releases/latest';
-const T081_NOTES = '• 修复更新包签名校验与下载完整性检查\n• 保持固定签名，支持后续版本覆盖更新\\n• 优化更新状态提示，避免将下载或打开安装器误报为安装成功\\n• 修复上一代更新流程中的边界问题';
+const T081_NOTES = '• 修复更新包签名校验与下载完整性检查\n• 保持固定签名，支持后续版本覆盖更新\n• 优化更新状态提示，避免将下载或打开安装器误报为安装成功\n• 修复上一代更新流程中的边界问题';
 
 function versionNumber(value) {
   const match = String(value || '').match(/T?(\d+)/i);
