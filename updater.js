@@ -2,10 +2,10 @@ import { FileTransfer } from '@capacitor/file-transfer';
 import { Filesystem, Directory } from '@capacitor/filesystem';
 import { FileOpener } from '@capacitor-community/file-opener';
 
-const APP_VERSION = 'T102.01';
+const APP_VERSION = 'T102.02';
 const REPOSITORY = 'kna58765-cpu/Points';
 const RELEASE_API = 'https://api.github.com/repos/' + REPOSITORY + '/releases?per_page=10';
-const T102_01_NOTES = '• 保留总览主页四分之一圆形空间背景与多层景深效果\\n• 优化圆形环带、球体高光与层次感，提升主界面空间氛围\\n• 优化账号页登出按钮视觉层次，采用柔和危险色与立体交互\\n• 明确退出云端账号不会删除本地积分数据，固定签名支持覆盖安装';
+const T102_02_NOTES = '• 全应用统一 OrangeOS 7 灵感的柔和透彩毛玻璃视觉\\n• 保留并加强总览页四分之一圆形空间背景与景深层次\\n• 统一成员卡、排行榜、积分流水、弹窗和底部导航的材质与圆角\\n• 优化按钮触控反馈、焦点状态及移动端安全区域适配\\n• 保留固定签名，支持覆盖安装并保留本地积分数据';
 
 function versionNumber(value) {
   const match = String(value || '').match(/T?(\d+)(?:\.(\d+))?/i);
@@ -79,7 +79,7 @@ export function consumeInstalledUpdate() {
   if (installed && installed !== APP_VERSION) {
     info = pending?.version === APP_VERSION
       ? pending
-      : { version: APP_VERSION, notes: T102_01_NOTES };
+      : { version: APP_VERSION, notes: T102_02_NOTES };
   }
 
   // A cancelled installation must not leave a stale "pending" success notice.
