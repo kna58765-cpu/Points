@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   build-android:
@@ -75,3 +75,32 @@ jobs:
           path: android/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
           retention-days: 30
+
+  publish-release:
+    name: Publish official GitHub Release
+    needs: build-android
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master' || github.event_name == 'workflow_dispatch'
+    steps:
+      - name: Download APK artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: POINTS-T076-Android-APK
+          path: release-assets
+
+      - name: Publish T076 release with APK
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: T076
+          name: POINTS T076
+          body: |
+            POINTS T076 正式版
+
+            - 按键升级为流体玻璃质感
+            - 底部导航支持横向滑动选择
+            - 修复版本号识别逻辑
+            - 优化应用内更新体验并保留更新完成动画
+          files: release-assets/app-debug.apk
+          draft: false
+          prerelease: false
+          make_latest: true
