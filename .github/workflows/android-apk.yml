@@ -95,16 +95,8 @@ jobs:
                   continue
           if not data:
               raise SystemExit("Base64 secret could not be decoded; regenerate Base64 from the original keystore")
-          # If the first decode is still printable Base64, decode exactly one more time.
-          text_data = data.decode("ascii", errors="ignore")
-          compact = re.sub(r"\s+", "", text_data)
-          if len(compact) > 100 and re.fullmatch(r"[A-Za-z0-9+/=_-]+", compact):
-              try:
-                  second = base64.b64decode(compact.replace("-", "+").replace("_", "/"), validate=False)
-                  if second and second != data:
-                      data = second
-              except Exception:
-                  pass
+          # A JKS file may contain long printable Base64-looking sections.
+          # Never auto-decode twice: Base64-encoded keystores must be decoded exactly once.
           if not data:
               raise SystemExit("Decoded signing keystore is empty")
           # Report only the file format, never key or password contents.
