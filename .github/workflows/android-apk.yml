@@ -57,8 +57,8 @@ jobs:
           import re
           p = Path('android/app/build.gradle')
           s = p.read_text()
-          s, code_count = re.subn(r'versionCode\s+\d+', 'versionCode 72072', s, count=1)
-          s, name_count = re.subn(r'versionName\s+[\'\"][^\'\"]+[\'\"]', 'versionName "T072"', s, count=1)
+          s, code_count = re.subn(r'versionCode\s+\d+', 'versionCode 73073', s, count=1)
+          s, name_count = re.subn(r'versionName\s+[\'\"][^\'\"]+[\'\"]', 'versionName "T073"', s, count=1)
           if code_count != 1 or name_count != 1:
               raise SystemExit('Could not set Android versionCode/versionName')
           p.write_text(s)
@@ -71,7 +71,7 @@ jobs:
       - name: Publish APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: POINTS-T072-Android-APK
+          name: POINTS-T073-Android-APK
           path: android/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
           retention-days: 30
