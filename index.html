@@ -416,10 +416,6 @@ async function activateTeam(teamId,preferCloud){
  setTeamStatus('已连接团队 · 云端实时更新');
  showMessage('团队已连接。成员、积分和流水开始同步。');
 }
-async function initializeCloudUser(user){
- activeUserId=user?.id||'';
- teamControls.hidden=!user;
- if(!user)return;
 function updateGate(){
  const hasAccount=!!activeUserId;
  const hasTeam=!!activeTeamId&&inviteBtn.hidden===false;
