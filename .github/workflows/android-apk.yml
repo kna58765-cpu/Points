@@ -150,8 +150,8 @@ jobs:
           import re
           p = Path('android/app/build.gradle')
           s = p.read_text()
-          s, code_count = re.subn(r"versionCode\s+\d+", "versionCode 75084", s, count=1)
-          s, name_count = re.subn(r"""versionName\s+["'][^"']+["']""", 'versionName "T084"', s, count=1)
+          s, code_count = re.subn(r"versionCode\s+\d+", "versionCode 75085", s, count=1)
+          s, name_count = re.subn(r"""versionName\s+["'][^"']+["']""", 'versionName "T085"', s, count=1)
           if code_count != 1 or name_count != 1:
               raise SystemExit('Could not set Android versionCode/versionName')
           p.write_text(s)
@@ -174,13 +174,13 @@ jobs:
           ACTUAL_CERT="$(printf '%s\n' "$SIGNER_OUTPUT" | sed -n 's/.*certificate SHA-256 digest: //p' | head -n 1 | tr -d ':' | tr '[:upper:]' '[:lower:]')"
           test -n "$ACTUAL_CERT" && test "$ACTUAL_CERT" = "$EXPECTED_CERT" || { echo "APK signer fingerprint does not match the fixed POINTS signing certificate"; exit 1; }
           mkdir -p release-assets
-          cp "$APK" release-assets/POINTS-T084.apk
+          cp "$APK" release-assets/POINTS-T085.apk
 
       - name: Publish APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: POINTS-T084-Android-APK
-          path: release-assets/POINTS-T084.apk
+          name: POINTS-T085-Android-APK
+          path: release-assets/POINTS-T085.apk
           if-no-files-found: error
           retention-days: 30
 
@@ -193,22 +193,22 @@ jobs:
       - name: Download APK artifact
         uses: actions/download-artifact@v4
         with:
-          name: POINTS-T084-Android-APK
+          name: POINTS-T085-Android-APK
           path: release-assets
 
-      - name: Publish T084 release with APK
+      - name: Publish T085 release with APK
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: T084
-          name: POINTS T084
+          tag_name: T085
+          name: POINTS T085
           body: |
-            POINTS T084 正式版
+            POINTS T085 正式版
 
-            - 主应用与只读展示页统一优化视觉层次和交互动效
-            - 优化页面切换、弹窗、卡片、按钮与输入控件反馈
-            - 适配系统减少动态效果与减少透明度偏好
+            - 修复生成邀请码后不显示或不醒目的问题，生成后立即弹窗展示完整邀请码
+            - 优化邀请码复制与展示体验
+            - 更新成功提示、弹窗进场和下载进度动画更加柔和舒适
             - 保持原固定签名，支持覆盖安装并保留数据
-          files: release-assets/POINTS-T084.apk
+          files: release-assets/POINTS-T085.apk
           draft: false
           prerelease: false
           make_latest: true
