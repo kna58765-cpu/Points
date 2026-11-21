@@ -150,8 +150,8 @@ jobs:
           import re
           p = Path('android/app/build.gradle')
           s = p.read_text()
-          s, code_count = re.subn(r"versionCode\s+\d+", "versionCode 75097", s, count=1)
-          s, name_count = re.subn(r"""versionName\s+["'][^"']+["']""", 'versionName "T096"', s, count=1)
+          s, code_count = re.subn(r"versionCode\s+\d+", "versionCode 75098", s, count=1)
+          s, name_count = re.subn(r"""versionName\s+["'][^"']+["']""", 'versionName "T097"', s, count=1)
           if code_count != 1 or name_count != 1:
               raise SystemExit('Could not set Android versionCode/versionName')
           p.write_text(s)
@@ -174,13 +174,13 @@ jobs:
           ACTUAL_CERT="$(printf '%s\n' "$SIGNER_OUTPUT" | sed -n 's/.*certificate SHA-256 digest: //p' | head -n 1 | tr -d ':' | tr '[:upper:]' '[:lower:]')"
           test -n "$ACTUAL_CERT" && test "$ACTUAL_CERT" = "$EXPECTED_CERT" || { echo "APK signer fingerprint does not match the fixed POINTS signing certificate"; exit 1; }
           mkdir -p release-assets
-          cp "$APK" release-assets/POINTS-T096.apk
+          cp "$APK" release-assets/POINTS-T097.apk
 
       - name: Publish APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: POINTS-T096-Android-APK
-          path: release-assets/POINTS-T096.apk
+          name: POINTS-T097-Android-APK
+          path: release-assets/POINTS-T097.apk
           if-no-files-found: error
           retention-days: 30
 
@@ -193,21 +193,21 @@ jobs:
       - name: Download APK artifact
         uses: actions/download-artifact@v4
         with:
-          name: POINTS-T096-Android-APK
+          name: POINTS-T097-Android-APK
           path: release-assets
 
-      - name: Replace previous T096 APK asset
+      - name: Replace previous T097 APK asset
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release delete-asset T096 POINTS-T096.apk --yes || true
+        run: gh release delete-asset T097 POINTS-T097.apk --yes || true
 
-      - name: Publish T096 release with APK
+      - name: Publish T097 release with APK
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: T096
-          name: POINTS T096
+          tag_name: T097
+          name: POINTS T097
           body: |
-            POINTS T096 正式版
+            POINTS T097 正式版
 
             - 移除团队和邀请码功能，保留原有积分数据
             - 移除团队、邀请码和团队协作入口
@@ -215,15 +215,15 @@ jobs:
             - 优化空间感 UI、环境光与悬浮卡片层次\n            - 强化主积分区、卡片和导航的立体质感\n            - 优化邮箱注册与登录页面布局
             - 新增密码显示/隐藏控制
             - 保持原固定签名，支持覆盖安装并保留数据
-          files: release-assets/POINTS-T096.apk
+          files: release-assets/POINTS-T097.apk
           draft: false
           prerelease: false
           make_latest: true
 
-      - name: Explicitly mark T096 as the latest release
+      - name: Explicitly mark T097 as the latest release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          RELEASE_ID=$(gh release view T096 --repo kna58765-cpu/Points --json databaseId --jq '.databaseId')
+          RELEASE_ID=$(gh release view T097 --repo kna58765-cpu/Points --json databaseId --jq '.databaseId')
           gh api --method PATCH repos/kna58765-cpu/Points/releases/$RELEASE_ID -f make_latest=true
-          gh release view T096 --repo kna58765-cpu/Points
+          gh release view T097 --repo kna58765-cpu/Points
