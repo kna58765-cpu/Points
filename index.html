@@ -239,7 +239,7 @@ body.auth-required #authGate{display:flex;position:fixed;inset:0;z-index:100;bac
 @media(max-width:420px){body.auth-required #authGate{padding:22px 16px}#authGate #cloudAuth{padding:21px!important;border-radius:24px}.auth-logo{font-size:52px}}
 
 </style></head>
-<body class="auth-required"><section id="authGate"><div class="auth-brand"><div class="auth-logo">P<span>.</span></div><div class="auth-wordmark">POINTS</div><p>每一分，都有迹可循。</p></div><div id="authGateSlot"></div><div class="auth-foot">安全登录 · 团队协作 · 实时积分</div></section><main class="app">
+<body class="auth-required"><section id="authGate"><div class="auth-brand"><div class="auth-logo">P<span>.</span></div><div class="auth-wordmark">POINTS</div><p>每一分，都有迹可循。</p></div><div id="authGateSlot"></div><script>document.addEventListener("DOMContentLoaded",function(){var gate=document.getElementById("authGateSlot"),panel=document.getElementById("cloudAuth");if(gate&&panel)gate.appendChild(panel);});</script><div class="auth-foot">安全登录 · 团队协作 · 实时积分</div></section><main class="app">
 <header><div><div class="brand">POINTS<span> / SCORE</span></div><div class="app-version">T069</div></div><div class="sub">Supabase 云端同步 · T069</div></header>
 <section class="panel" id="cloudAuth" style="padding:18px;margin:0 0 18px">
   <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
