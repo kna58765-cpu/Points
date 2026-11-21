@@ -37,5 +37,8 @@ await build({
   format: 'esm',
   target: ['es2020'],
   minify: true,
+  // Keep the project URL and publishable key as a small local config module.
+  // The config is copied into www/ before bundling, so it must remain external.
+  external: ['./supabase-config.js'],
 });
 console.log('Bundled Supabase SDK locally (no runtime CDN request)');
