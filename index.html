@@ -527,7 +527,7 @@ joinTeamBtn.addEventListener('click',async()=>{
 inviteBtn.addEventListener('click',async()=>{
  if(!activeTeamId)return;
  inviteBtn.disabled=true;inviteBtn.textContent='正在生成…';
- try{const code=await cloudApi.createInvite(activeTeamId,30);generatedInviteCode=String(code);localStorage.setItem('points-invite-'+activeTeamId,JSON.stringify({code:generatedInviteCode,createdAt:Date.now()}));inviteResult.textContent='当前邀请码：'+generatedInviteCode+'（最多 30 人使用，有效期 7 天）';copyInviteBtn.hidden=false;showMessage('邀请码已生成并保存。点击「复制邀请码」发送给成员。')}
+ try{const code=await cloudApi.createInvite(activeTeamId,30);generatedInviteCode=String(code);localStorage.setItem('points-invite-'+activeTeamId,JSON.stringify({code:generatedInviteCode,createdAt:Date.now()}));inviteResult.hidden=false;inviteResult.style.display='block';inviteResult.textContent='当前邀请码：'+generatedInviteCode+'（最多 30 人使用，有效期 7 天）';copyInviteBtn.hidden=false;showPage('team');inviteResult.scrollIntoView({behavior:'smooth',block:'center'});showMessage('邀请码已生成并保存。');window.alert('POINTS 邀请码：\\n\\n'+generatedInviteCode+'\\n\\n最多 30 人使用，有效期 7 天。')}
  catch(e){showMessage('生成邀请码失败：'+errorText(e),true)}
  finally{inviteBtn.disabled=false;inviteBtn.textContent='生成邀请码'}
 });
