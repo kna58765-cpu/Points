@@ -96,3 +96,24 @@ export function watchTeam(teamId, callback) {
     .subscribe();
   return () => db.removeChannel(channel);
 }
+
+export async function loadTeamState(teamId) {
+  const { data, error } = await client().from("team_state").select("state,updated_by,updated_at").eq("team_id", teamId).maybeSingle();
+  if (error) throw error;
+  return data || null;
+}
+export async function writeTeamState(teamId, state) {
+  const user = await currentUser();
+  if (!user) throw new Error("请先登录云端账号");
+  const { error } = await client().from("team_state").upsert({
+    team_id: teamId, state, updated_by: user.id, updated_at: new Date().toISOString()
+  }, { onConflict: "team_id" });
+  if (error) throw error;
+}
+export function watchTeamState(teamId, callback) {
+  const db = client();
+  const channel = db.channel("points-state-" + teamId)
+    .on("postgres_changes", { event: "*", schema: "public", table: "team_state", filter: "team_id=eq." + teamId }, callback)
+    .subscribe();
+  return () => db.removeChannel(channel);
+}
