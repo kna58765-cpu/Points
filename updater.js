@@ -2,7 +2,7 @@ import { FileTransfer } from '@capacitor/file-transfer';
 import { Filesystem, Directory } from '@capacitor/filesystem';
 import { FileOpener } from '@capacitor-community/file-opener';
 
-const APP_VERSION = 'T076';
+const APP_VERSION = 'T077';
 const REPOSITORY = 'kna58765-cpu/Points';
 const RELEASE_API = 'https://api.github.com/repos/' + REPOSITORY + '/releases/latest';
 const T076_NOTES = '• 按键升级为流体玻璃质感\n• 底部导航支持横向滑动选择\n• 修复版本号识别逻辑\n• 优化应用内更新体验并保留更新完成动画';
@@ -66,8 +66,8 @@ export function consumeInstalledUpdate() {
   const installed = localStorage.getItem('points.installedVersion') || '';
   let info = null;
   if (pending?.version === APP_VERSION) info = pending;
-  else if (!installed && APP_VERSION === 'T076') info = { version: APP_VERSION, notes: T076_NOTES };
-  else if (installed && installed !== APP_VERSION) info = { version: APP_VERSION, notes: T075_NOTES };
+  else if (!installed && APP_VERSION === 'T077') info = { version: APP_VERSION, notes: T077_NOTES };
+  else if (installed && installed !== APP_VERSION) info = { version: APP_VERSION, notes: T077_NOTES };
   localStorage.removeItem('points.pendingUpdate');
   localStorage.setItem('points.installedVersion', APP_VERSION);
   return info;
