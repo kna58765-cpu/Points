@@ -103,8 +103,8 @@ jobs:
           import re
           p = Path('android/app/build.gradle')
           s = p.read_text()
-          s, code_count = re.subn(r'versionCode\s+\d+', 'versionCode 75080', s, count=1)
-          s, name_count = re.subn(r'versionName\s+[\'\"][^\'\"]+[\'\"]', 'versionName "T080"', s, count=1)
+          s, code_count = re.subn(r'versionCode\s+\d+', 'versionCode 75081', s, count=1)
+          s, name_count = re.subn(r'versionName\s+[\'\"][^\'\"]+[\'\"]', 'versionName "T081"', s, count=1)
           if code_count != 1 or name_count != 1:
               raise SystemExit('Could not set Android versionCode/versionName')
           p.write_text(s)
@@ -121,15 +121,18 @@ jobs:
       - name: Verify APK signature
         run: |
           APK=android/app/build/outputs/apk/debug/app-debug.apk
-          "$ANDROID_HOME/build-tools/36.0.0/apksigner" verify --print-certs "$APK"
+          SIGNER_OUTPUT="$("$ANDROID_HOME/build-tools/36.0.0/apksigner" verify --print-certs "$APK")"
+          echo "$SIGNER_OUTPUT"
+          EXPECTED_CERT="FE:1F:41:16:FC:A2:FA:F2:B7:9A:3A:92:29:6C:99:D2:39:6B:F8:B5:DE:E1:C7:53:94:25:25:FF:F9:A4:AE:DC"
+          echo "$SIGNER_OUTPUT" | grep -Fq "$EXPECTED_CERT" || { echo "APK signer fingerprint does not match the fixed POINTS signing certificate"; exit 1; }
           mkdir -p release-assets
-          cp "$APK" release-assets/POINTS-T080.apk
+          cp "$APK" release-assets/POINTS-T081.apk
 
       - name: Publish APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: POINTS-T080-Android-APK
-          path: release-assets/POINTS-T080.apk
+          name: POINTS-T081-Android-APK
+          path: release-assets/POINTS-T081.apk
           if-no-files-found: error
           retention-days: 30
 
@@ -142,22 +145,22 @@ jobs:
       - name: Download APK artifact
         uses: actions/download-artifact@v4
         with:
-          name: POINTS-T080-Android-APK
+          name: POINTS-T081-Android-APK
           path: release-assets
 
-      - name: Publish T080 release with APK
+      - name: Publish T081 release with APK
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: T080
-          name: POINTS T080
+          tag_name: T081
+          name: POINTS T081
           body: |
-            POINTS T080 正式版
+            POINTS T081 正式版
 
-            - 修复上一代更新流程遗留问题
-            - 只有实际安装新版本后才显示更新完成动画
-            - 取消安装不会误报成功
-            - 统一固定 APK 签名，支持后续覆盖更新
-          files: release-assets/POINTS-T080.apk
+            - 修复更新包签名校验与下载完整性检查
+            - 保持固定签名，支持后续版本覆盖更新
+            - 优化更新状态提示，避免将下载或打开安装器误报为安装成功
+            - 修复上一代更新流程中的边界问题
+          files: release-assets/POINTS-T081.apk
           draft: false
           prerelease: false
           make_latest: true
