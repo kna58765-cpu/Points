@@ -455,7 +455,7 @@ nav button.active{box-shadow:0 7px 18px rgba(5,8,14,.24),inset 0 1px 0 rgba(255,
 @media(prefers-reduced-motion:reduce){.stat,.member{transition:none}}
 
 
-/* T099 OrangeOS 7-inspired full-app visual system */
+/* T100 OrangeOS 7-inspired full-app visual system */
 :root{--os-bg:#f3f5f8;--os-ink:#17191d;--os-muted:#858b95;--os-warm:#ff9a4a;--os-shadow:0 18px 48px rgba(39,53,78,.10),inset 0 1px 0 rgba(255,255,255,.92)}
 html{background:var(--os-bg);scroll-behavior:smooth}
 body{background:radial-gradient(ellipse at 6% 0%,rgba(255,177,112,.19),transparent 36%),radial-gradient(ellipse at 96% 12%,rgba(135,174,255,.20),transparent 34%),linear-gradient(160deg,#f8f9fb,#eef1f6 58%,#f6f4f2);color:var(--os-ink)}
@@ -485,7 +485,7 @@ nav button.active{background:linear-gradient(140deg,#343a45,#171b22);color:#fff;
 @media(prefers-reduced-transparency:reduce){.stat,.member,.panel,nav,.modal,.control-menu{backdrop-filter:none!important;background:#fff!important}}
 
 
-/* T099: refined native-feel surface + deliberate text interaction */
+/* T100: refined native-feel surface + deliberate text interaction */
 :root{
   --t098-bg:#f4f5f7;
   --t098-card:rgba(255,255,255,.88);
@@ -555,6 +555,19 @@ input,textarea,select,[contenteditable="true"],[data-text-selectable="true"]{
   -webkit-touch-callout:default!important;
 }
 
+
+/* T100 overview spatial quarter-circle */
+.page-view[data-view="overview"] .hero{min-height:clamp(178px,28vw,226px);padding:clamp(25px,5vw,36px);background:radial-gradient(ellipse at 82% 115%,rgba(115,137,184,.24),transparent 48%),linear-gradient(132deg,#242a34 0%,#111720 48%,#080b11 100%);box-shadow:0 28px 62px rgba(20,29,45,.25),0 8px 20px rgba(20,29,45,.13),inset 0 1px 0 rgba(255,255,255,.19)}
+.page-view[data-view="overview"] .hero:before{content:"";position:absolute;z-index:0;pointer-events:none;width:clamp(245px,66vw,390px);aspect-ratio:1;right:clamp(-175px,-25vw,-105px);top:clamp(-205px,-39vw,-145px);border-radius:50%;background:radial-gradient(circle at 34% 38%,rgba(255,255,255,.27),rgba(180,198,232,.12) 19%,rgba(84,111,164,.10) 38%,transparent 68%),conic-gradient(from 218deg at 48% 48%,rgba(255,255,255,.14),rgba(126,157,219,.035),rgba(255,255,255,.16),rgba(255,255,255,.025));border:1px solid rgba(255,255,255,.16);box-shadow:0 0 0 18px rgba(255,255,255,.025),0 0 0 38px rgba(167,190,235,.045),0 0 0 62px rgba(255,255,255,.022),inset -22px -24px 46px rgba(0,0,0,.35),inset 12px 12px 32px rgba(255,255,255,.06);transform:rotate(-18deg)}
+.page-view[data-view="overview"] .hero:after{content:"";position:absolute;z-index:0;pointer-events:none;width:clamp(145px,39vw,225px);aspect-ratio:1;right:clamp(-102px,-15vw,-56px);top:clamp(-130px,-25vw,-86px);border-radius:50%;border:1px solid rgba(255,255,255,.17);background:radial-gradient(circle at 32% 27%,rgba(255,255,255,.19),rgba(135,157,203,.07) 30%,rgba(7,11,18,.18) 69%,rgba(255,255,255,.025) 72%,transparent 73%);box-shadow:inset -12px -15px 24px rgba(0,0,0,.28),inset 7px 7px 17px rgba(255,255,255,.07),0 14px 34px rgba(0,0,0,.13)}
+.page-view[data-view="overview"] .hero>*{position:relative;z-index:2}
+.page-view[data-view="overview"] .hero small{color:#b8c2d3;letter-spacing:1.5px}
+.page-view[data-view="overview"] .total{font-size:clamp(43px,9vw,70px);letter-spacing:-2.5px;text-shadow:0 5px 28px rgba(213,226,255,.18)}
+.page-view[data-view="overview"] .hero-note{color:#c0c8d6;line-height:1.8;position:relative}
+.page-view[data-view="overview"] .hero-note:before{content:"";display:block;width:30px;height:2px;margin:0 0 10px auto;border-radius:3px;background:linear-gradient(90deg,transparent,#c7d5f4)}
+@media(max-width:480px){.page-view[data-view="overview"] .hero{min-height:184px;padding:24px 20px;align-items:flex-end}.page-view[data-view="overview"] .hero-note{font-size:11px;max-width:105px}.page-view[data-view="overview"] .hero:before{right:-125px;top:-148px;width:270px}.page-view[data-view="overview"] .hero:after{right:-69px;top:-88px;width:160px}}
+@media(prefers-reduced-transparency:reduce){.page-view[data-view="overview"] .hero:before,.page-view[data-view="overview"] .hero:after{opacity:.45}}
+
 </style>
 <style id="update-center-t099">
 .update-center{padding:18px!important;margin-bottom:14px;overflow:hidden;position:relative;background:linear-gradient(155deg,#fff 0%,#f7f9fc 100%);border:1px solid #e4e9f1!important;box-shadow:0 12px 34px rgba(35,52,79,.07)!important}
@@ -587,7 +600,7 @@ input,textarea,select,[contenteditable="true"],[data-text-selectable="true"]{
 </style>
 </head>
 <body class="auth-required"><section id="authGate"><div class="auth-brand"><div class="auth-logo">P<span>.</span></div><div class="auth-wordmark">POINTS</div><p>每一分，都有迹可循。</p></div><div id="authGateSlot"></div><script>document.addEventListener("DOMContentLoaded",function(){var gate=document.getElementById("authGateSlot"),panel=document.getElementById("cloudAuth");if(gate&&panel)gate.appendChild(panel);});</script><div class="auth-foot">邮箱登录 · 个人数据 · 云端同步</div></section><main class="app">
-<header><div><div class="brand">POINTS<span> / SCORE</span></div><div class="app-version">T099</div></div><div class="sub">个人云端同步 · T099</div></header>
+<header><div><div class="brand">POINTS<span> / SCORE</span></div><div class="app-version">T100</div></div><div class="sub">个人云端同步 · T100</div></header>
 <section class="panel" id="cloudAuth" style="padding:18px;margin:0 0 18px">
   <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
     <div><b>邮箱账号</b><div class="muted" id="cloudStatus">尚未登录 · 等待 Supabase 项目配置</div></div>
@@ -636,7 +649,7 @@ input,textarea,select,[contenteditable="true"],[data-text-selectable="true"]{
    </div>
   </div>
   <button class="plain ui-btn primary update-check-button" id="accountCheckUpdate" type="button">检查更新</button>
-  <div id="updateStatus" class="update-status-box" role="status">当前版本 T099。检查 GitHub 官方正式版；下载后由安卓系统确认覆盖安装，无需卸载。</div>
+  <div id="updateStatus" class="update-status-box" role="status">当前版本 T100。检查 GitHub 官方正式版；下载后由安卓系统确认覆盖安装，无需卸载。</div>
   <section id="updateResult" hidden class="update-release-card">
    <div class="update-release-top">
     <div><span class="update-release-label">正式版本</span><b id="updateVersion">发现新版本</b></div>
@@ -662,7 +675,7 @@ input,textarea,select,[contenteditable="true"],[data-text-selectable="true"]{
 <section class="page-view" data-view="audit"><div class="section-head"><h2>操作记录</h2><span class="sub">最近 50 条</span></div><section class="panel" id="auditHistory"></section></section>
 </main>
 <nav id="mainNav"><button class="active" type="button" data-page="overview">◉ 总览</button><button type="button" data-page="rank">▤ 排行</button><button type="button" data-page="members">♙ 成员</button><button type="button" data-page="history">≡ 流水</button><button type="button" data-page="audit">≡ 操作</button><button type="button" data-page="account">◎ 账号</button></nav>
-<aside id="updateToast" aria-live="polite" aria-atomic="true"><div class="update-toast-head"><span class="update-toast-check">✓</span><div><b>更新完成</b><small id="updateToastVersion">POINTS T099 已成功安装</small></div><button type="button" id="updateToastClose" aria-label="关闭">×</button></div><div class="update-toast-label">本次更新内容</div><div id="updateToastNotes"></div></aside>
+<aside id="updateToast" aria-live="polite" aria-atomic="true"><div class="update-toast-head"><span class="update-toast-check">✓</span><div><b>更新完成</b><small id="updateToastVersion">POINTS T100 已成功安装</small></div><button type="button" id="updateToastClose" aria-label="关闭">×</button></div><div class="update-toast-label">本次更新内容</div><div id="updateToastNotes"></div></aside>
 <div class="modal-bg" id="modal"><div class="modal"><h3 id="modalTitle">添加成员</h3><label class="sub">成员名称</label><input class="field" id="nameInput" maxlength="24" placeholder="输入成员名称"><label class="sub" id="groupLabel">所属分组</label><input class="field" id="groupInput" maxlength="20" placeholder="例如：一班、二班、管理员组"><label class="sub hide" id="colorLabel">头像颜色</label><select class="field hide" id="colorInput"><option value="#111111">黑色</option><option value="#555555">深灰</option><option value="#777777">灰色</option><option value="#9a9a9a">浅灰</option><option value="#333333">炭黑</option></select><label class="sub" id="amountLabel">积分数值</label><input class="field" id="amountInput" type="number" min="1" max="99999" placeholder="例如 10"><label class="sub hide" id="noteLabel">备注（选填）</label><input class="field hide" id="noteInput" maxlength="80" placeholder="例如：完成任务、迟到"><div class="modal-actions"><button class="outline" id="deleteMember" style="display:none">删除成员</button><button class="outline" id="cancel">取消</button><button class="plain" id="confirm">确认</button></div></div></div>
 <div class="modal-bg" id="detailModal"><div class="modal" style="max-height:85dvh;overflow:auto"><div style="display:flex;justify-content:space-between"><h3 id="detailName">成员详情</h3><button class="outline" id="closeDetail">关闭</button></div><div class="hero" style="margin:8px 0 14px;padding:20px"><div><small>MEMBER TOTAL POINTS</small><div class="total" id="detailPoints">0</div></div></div><div class="stats"><div class="stat"><label>累计加分</label><strong id="detailEarned">0</strong></div><div class="stat"><label>累计扣分</label><strong id="detailSpent">0</strong></div><div class="stat"><label>记录次数</label><strong id="detailCount">0</strong></div></div><div class="section-head"><h2>全部积分记录</h2></div><section class="panel" id="detailHistory"></section></div></div><script>
 const KEY='points-v1';let data=JSON.parse(localStorage.getItem(KEY)||'null')||{members:[],logs:[]};data.settings=Object.assign({maxAdd:99999,maxDeduct:99999},data.settings||{});data.audit=Array.isArray(data.audit)?data.audit:[];let mode='member',target=null;let adminMode=true;
