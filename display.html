@@ -24,6 +24,24 @@ button,select{font:inherit;border:1px solid #ddd;background:#fff;border-radius:1
 .left{display:flex;align-items:center;gap:12px}.rank{width:30px;height:30px;border-radius:10px;background:#f0f0f0;display:grid;place-items:center;font-weight:800}.muted{font-size:12px;color:#888;margin-top:4px}
 .empty{padding:28px;text-align:center;color:#999;font-size:13px}.foot{margin-top:24px;color:#999;font-size:12px;text-align:center;line-height:1.7}
 @media(max-width:520px){main{padding:18px 15px 45px}header{padding-bottom:20px}.hero{padding:22px}.section{align-items:flex-start}}
+
+/* T084 display polish */
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+button,select{-webkit-tap-highlight-color:transparent;transition:transform .2s cubic-bezier(.2,.75,.25,1),box-shadow .2s ease,border-color .2s ease}
+button:focus-visible,select:focus-visible{outline:2px solid #777;outline-offset:3px}
+.hero{position:relative;isolation:isolate;overflow:hidden;background:radial-gradient(ellipse at 92% 8%,rgba(255,255,255,.13),transparent 36%),linear-gradient(135deg,#202020,#080808 72%);box-shadow:0 14px 34px rgba(0,0,0,.1),inset 0 1px 0 rgba(255,255,255,.12)}
+.hero:after{content:"";position:absolute;z-index:-1;width:220px;height:220px;right:-100px;top:-125px;border:1px solid rgba(255,255,255,.12);border-radius:50%;box-shadow:0 0 0 24px rgba(255,255,255,.025),0 0 0 50px rgba(255,255,255,.018)}
+.card,.list,button,select{transition:transform .22s cubic-bezier(.2,.75,.25,1),box-shadow .22s ease,border-color .2s ease}
+.card{box-shadow:0 6px 22px rgba(0,0,0,.045);animation:displayEnter .3s ease both}
+.card:nth-child(2){animation-delay:.035s}.card:nth-child(3){animation-delay:.07s}.card:nth-child(4){animation-delay:.105s}
+.item{transition:background .18s ease}
+.item:active{background:#f7f7f7}
+@media(hover:hover) and (pointer:fine){.card:hover{transform:translateY(-3px);box-shadow:0 15px 34px rgba(0,0,0,.09);border-color:#ddd}button:hover,select:hover{border-color:#bbb;box-shadow:0 5px 14px rgba(0,0,0,.06)}}
+@keyframes displayEnter{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:520px){main{padding-bottom:calc(45px + env(safe-area-inset-bottom))}.hero{box-shadow:0 10px 26px rgba(0,0,0,.09)}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
+
 </style>
 </head>
 <body><main>
