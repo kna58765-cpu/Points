@@ -98,6 +98,18 @@ begin
   return new_id;
 end; $$;
 
+create or replace function public.dissolve_team(p_team_id uuid)
+returns boolean language plpgsql security definer set search_path=public
+as $
+begin
+  if auth.uid() is null then raise exception '请先登录'; end if;
+  if not exists(select 1 from public.teams where id=p_team_id and owner_id=auth.uid()) then
+    raise exception '只有团队创建者可以解散团队';
+  end if;
+  delete from public.teams where id=p_team_id;
+  return true;
+end; $;
+
 create or replace function public.create_team_invite(p_team_id uuid,p_max_uses integer default 20)
 returns text language plpgsql security definer set search_path=public
 as $$
@@ -171,12 +183,14 @@ begin
 end; $$;
 
 revoke all on function public.create_team(text) from public;
+revoke all on function public.dissolve_team(uuid) from public;
 revoke all on function public.create_team_invite(uuid,integer) from public;
 revoke all on function public.accept_team_invite(text) from public;
 revoke all on function public.add_person(uuid,text,text,text) from public;
 revoke all on function public.add_score(uuid,uuid,integer,text) from public;
 revoke all on function public.undo_score(uuid) from public;
 grant execute on function public.create_team(text) to authenticated;
+grant execute on function public.dissolve_team(uuid) to authenticated;
 grant execute on function public.create_team_invite(uuid,integer) to authenticated;
 grant execute on function public.accept_team_invite(text) to authenticated;
 grant execute on function public.add_person(uuid,text,text,text) to authenticated;
