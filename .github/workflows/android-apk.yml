@@ -62,7 +62,24 @@ jobs:
           test -n "$POINTS_KEYSTORE_PASSWORD" || { echo "Missing POINTS_KEYSTORE_PASSWORD repository secret"; exit 1; }
           test -n "$POINTS_KEY_ALIAS" || { echo "Missing POINTS_KEY_ALIAS repository secret"; exit 1; }
           test -n "$POINTS_KEY_PASSWORD" || { echo "Missing POINTS_KEY_PASSWORD repository secret"; exit 1; }
-          echo "$POINTS_KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/points-release-key.jks"
+          python3 - <<'PY'
+          import base64, os, re
+          from pathlib import Path
+          raw = os.environ["POINTS_KEYSTORE_BASE64"]
+          # Normalize BOM, pasted whitespace/wrapping, and optional surrounding quotes.
+          raw = raw.lstrip("\\ufeff").strip().strip("\\\"'")
+          # Accept only Base64 alphabet and padding; never print secret material.
+          cleaned = re.sub(r"[^A-Za-z0-9+/=_-]", "", raw).replace("-", "+").replace("_", "/")
+          cleaned = cleaned.rstrip("=")
+          cleaned += "=" * ((4 - len(cleaned) % 4) % 4)
+          try:
+              data = base64.b64decode(cleaned, validate=True)
+          except Exception:
+              raise SystemExit("POINTS_KEYSTORE_BASE64 is not valid Base64 after safe whitespace/format normalization")
+          if not data:
+              raise SystemExit("POINTS_KEYSTORE_BASE64 decoded to an empty file")
+          Path(os.environ["RUNNER_TEMP"], "points-release-key.jks").write_bytes(data)
+          PY
           export POINTS_KEYSTORE_PATH="$RUNNER_TEMP/points-release-key.jks"
           echo "POINTS_KEYSTORE_PATH=$POINTS_KEYSTORE_PATH" >> "$GITHUB_ENV"
           python3 - <<'PY'
@@ -81,15 +98,15 @@ jobs:
               }
           '''
           if 'signingConfigs {' not in s:
-              s, n = re.subn(r'(?m)^\s*buildTypes\s*\{', signing + '\n            buildTypes {', s, count=1)
+              s, n = re.subn(r'(?m)^\\s*buildTypes\\s*\\{', signing + '\\n            buildTypes {', s, count=1)
               if n != 1:
                   raise SystemExit('Could not add fixed signing configuration')
-          if re.search(r'(?m)^\s*debug\s*\{', s):
-              s, n = re.subn(r'(?m)^(\s*)debug\s*\{', r'\1debug {\n\1    signingConfig signingConfigs.release', s, count=1)
+          if re.search(r'(?m)^\\s*debug\\s*\\{', s):
+              s, n = re.subn(r'(?m)^(\\s*)debug\\s*\\{', r'\\1debug {\\n\\1    signingConfig signingConfigs.release', s, count=1)
               if n != 1:
                   raise SystemExit('Could not configure debug signing')
           else:
-              s, n = re.subn(r'(?m)^(\s*)buildTypes\s*\{', r'\1buildTypes {\n\1    debug { signingConfig signingConfigs.release }', s, count=1)
+              s, n = re.subn(r'(?m)^(\\s*)buildTypes\\s*\\{', r'\\1buildTypes {\\n\\1    debug { signingConfig signingConfigs.release }', s, count=1)
               if n != 1:
                   raise SystemExit('Could not add debug build type')
           p.write_text(s)
@@ -103,8 +120,8 @@ jobs:
           import re
           p = Path('android/app/build.gradle')
           s = p.read_text()
-          s, code_count = re.subn(r'versionCode\s+\d+', 'versionCode 75082', s, count=1)
-          s, name_count = re.subn(r'versionName\s+[\'\"][^\'\"]+[\'\"]', 'versionName "T082"', s, count=1)
+          s, code_count = re.subn(r'versionCode\\s+\\d+', 'versionCode 75082', s, count=1)
+          s, name_count = re.subn(r'versionName\\s+[\\'\\"][^\\'\\"]+[\\'\\"]', 'versionName "T082"', s, count=1)
           if code_count != 1 or name_count != 1:
               raise SystemExit('Could not set Android versionCode/versionName')
           p.write_text(s)
