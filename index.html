@@ -306,6 +306,10 @@ body.auth-required #authGate{display:flex;position:fixed;inset:0;z-index:100;bac
   <section id="updateResult" hidden style="border:1px solid #e8e8e8;border-radius:16px;padding:14px;background:#fafafa">
    <div style="display:flex;justify-content:space-between;gap:10px;align-items:center"><b id="updateVersion">发现新版本</b><span class="muted" id="updateSize"></span></div>
    <div id="updateNotes" style="white-space:pre-wrap;line-height:1.65;font-size:13px;color:#555;margin:10px 0"></div>
+   <div id="downloadProgressWrap" hidden style="margin:12px 0">
+    <div id="downloadProgressText" class="muted" style="margin-bottom:7px">准备下载官方 APK…</div>
+    <div style="height:7px;background:#e9e9e9;border-radius:99px;overflow:hidden"><div id="downloadProgressBar" style="height:100%;width:0;background:#16834a;border-radius:99px;transition:width .18s"></div></div>
+   </div>
    <button class="plain ui-btn primary" id="downloadUpdate" type="button" style="width:100%">下载并安装</button>
   </section>
  </section>
@@ -600,10 +604,20 @@ accountCheckUpdate?.addEventListener('click',async()=>{
 });
 downloadUpdate?.addEventListener('click',async()=>{
  if(!availableUpdate||!updater)return;
- downloadUpdate.disabled=true;downloadUpdate.textContent='正在打开下载…';
- try{await updater.downloadUpdate(availableUpdate);updateStatus.textContent='已打开官方 APK 下载页面。下载完成后，请在系统提示中确认安装并重新打开 POINTS。'}
- catch(error){updateStatus.textContent=error.message||'无法打开下载链接。'}
- finally{downloadUpdate.disabled=false;downloadUpdate.textContent='下载并安装'}
+ downloadUpdate.disabled=true;downloadUpdate.textContent='正在下载…';
+ const wrap=document.getElementById('downloadProgressWrap'),bar=document.getElementById('downloadProgressBar'),label=document.getElementById('downloadProgressText');
+ wrap.hidden=false;
+ try{
+  await updater.downloadUpdate(availableUpdate,progress=>{
+   bar.style.width=(progress.percent||0)+'%';label.textContent=progress.message||'正在下载官方 APK…';
+   updateStatus.textContent=progress.message||'正在下载官方 APK…';
+  });
+  updateStatus.textContent='APK 已下载并校验。请在 Android 系统安装界面确认安装，安装完成后重新打开 POINTS。';
+  downloadUpdate.textContent='等待系统安装确认';
+ }catch(error){
+  updateStatus.textContent=error.message||'APK 下载或安装启动失败，当前版本未受影响。';
+  downloadUpdate.disabled=false;downloadUpdate.textContent='重新下载 APK';
+ }
 });
 
 createTeamBtn.addEventListener('click',async()=>{
