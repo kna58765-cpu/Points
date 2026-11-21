@@ -28,6 +28,25 @@ export async function register(email, password, nickname) {
   if (error) throw error;
   return data;
 }
+export async function joinWithInvite(code, nickname) {
+  const db = client();
+  const { data, error } = await db.auth.signInAnonymously({
+    options: { data: { nickname: String(nickname || "").trim().slice(0, 40), invited: true } }
+  });
+  if (error) {
+    if (/anonymous.*disabled|anonymous sign-ins are disabled/i.test(error.message || "")) {
+      throw new Error("当前云端尚未开启匿名登录。请在 Supabase Authentication 设置中开启 Anonymous Sign-Ins。");
+    }
+    throw error;
+  }
+  try {
+    await rpc("accept_team_invite", { p_code: String(code || "").trim().toUpperCase() });
+    return data;
+  } catch (joinError) {
+    await db.auth.signOut();
+    throw joinError;
+  }
+}
 export async function login(email, password) {
   const { data, error } = await client().auth.signInWithPassword({ email, password });
   if (error) throw error;
