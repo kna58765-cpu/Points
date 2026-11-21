@@ -210,8 +210,36 @@ nav button{min-width:0;white-space:nowrap}
  nav button{padding:8px 6px;font-size:11px}
 }
 
+/* Social-style account gate: the app is inaccessible until account + team access */
+body.auth-required{background:#fff}
+body.auth-required .app,body.auth-required #mainNav{display:none!important}
+#authGate{display:none}
+body.auth-required #authGate{display:flex;position:fixed;inset:0;z-index:100;background:#fff;overflow:auto;align-items:center;justify-content:center;flex-direction:column;padding:28px 20px calc(24px + env(safe-area-inset-bottom))}
+.auth-brand{text-align:center;margin:0 auto 24px}
+.auth-logo{font-size:58px;font-weight:950;letter-spacing:-5px;line-height:1;color:#111}
+.auth-logo span{color:#999}
+.auth-wordmark{font-size:20px;font-weight:850;letter-spacing:4px;margin-top:12px}
+.auth-brand p{color:#777;font-size:15px;margin:10px 0 0}
+#authGateSlot{width:min(100%,440px)}
+#authGate #cloudAuth{margin:0!important;padding:25px!important;border:1px solid #eee;border-radius:28px;box-shadow:0 18px 60px #00000008}
+#authGate #cloudAuth>div:first-child{display:none!important}
+#authGate #cloudForm{margin-top:0!important}
+#authGate #cloudName{display:none}
+#authGate #cloudSignIn,#authGate #cloudRegister{width:100%;min-height:50px;border-radius:16px;font-weight:750}
+#authGate #cloudSignIn{background:#111;color:#fff;border:1px solid #111}
+#authGate #cloudRegister{background:#fff;color:#111;border:1px solid #e3e3e3}
+#authGate .auth-title{font-size:25px;font-weight:850;letter-spacing:-.8px;margin:0 0 6px}
+#authGate .auth-caption{font-size:13px;color:#777;margin:0 0 20px}
+#authGate .auth-switch{width:100%;border:0;background:none;color:#555;text-decoration:underline;padding:14px 6px 2px;font-size:13px}
+#authGate .auth-foot{color:#aaa;font-size:11px;letter-spacing:.6px;text-align:center;margin-top:22px}
+#authGate #cloudTeamControls{border-top:1px solid #eee!important}
+#authGate #cloudTeamControls b{font-size:18px}
+#authGate #cloudTeamControls button{min-height:46px;border-radius:14px}
+#authGate #cloudInviteCode{font-size:16px}
+@media(max-width:420px){body.auth-required #authGate{padding:22px 16px}#authGate #cloudAuth{padding:21px!important;border-radius:24px}.auth-logo{font-size:52px}}
+
 </style></head>
-<body><main class="app">
+<body class="auth-required"><section id="authGate"><div class="auth-brand"><div class="auth-logo">P<span>.</span></div><div class="auth-wordmark">POINTS</div><p>每一分，都有迹可循。</p></div><div id="authGateSlot"></div><div class="auth-foot">安全登录 · 团队协作 · 实时积分</div></section><main class="app">
 <header><div><div class="brand">POINTS<span> / SCORE</span></div><div class="app-version">T069</div></div><div class="sub">Supabase 云端同步 · T069</div></header>
 <section class="panel" id="cloudAuth" style="padding:18px;margin:0 0 18px">
   <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
@@ -315,6 +343,29 @@ const logoutEl=document.getElementById('cloudLogout');
 const nameEl=document.getElementById('cloudName');
 const emailEl=document.getElementById('cloudEmail');
 const passwordEl=document.getElementById('cloudPassword');
+const authGateSlot=document.getElementById('authGateSlot');
+const cloudAuthPanel=document.getElementById('cloudAuth');
+authGateSlot.appendChild(cloudAuthPanel);
+const authTitle=document.createElement('div');
+authTitle.className='auth-title';authTitle.textContent='欢迎加入 POINTS';
+const authCaption=document.createElement('div');
+authCaption.className='auth-caption';authCaption.textContent='登录账号，继续管理你的团队积分';
+formEl.prepend(authCaption);formEl.prepend(authTitle);
+const authSwitch=document.createElement('button');
+authSwitch.type='button';authSwitch.className='auth-switch';authSwitch.textContent='新用户？创建账号';
+formEl.appendChild(authSwitch);
+let authMode='login';
+authSwitch.addEventListener('click',()=>{
+ authMode=authMode==='login'?'register':'login';
+ nameEl.style.display=authMode==='register'?'block':'none';
+ nameEl.required=authMode==='register';
+ authTitle.textContent=authMode==='login'?'欢迎回来':'创建你的 POINTS 账号';
+ authCaption.textContent=authMode==='login'?'登录账号，继续管理你的团队积分':'注册账号后，通过邮箱确认即可开始';
+ document.getElementById('cloudSignIn').hidden=authMode!=='login';
+ document.getElementById('cloudRegister').hidden=authMode!=='register';
+ authSwitch.textContent=authMode==='login'?'新用户？创建账号':'已有账号？返回登录';
+});
+
 let cloudApi=null;
 function showMessage(message,isError=false){messageEl.textContent=message;messageEl.style.color=isError?'#d93636':'#777'}
 function showUser(user){statusEl.textContent=user?('已登录：'+(user.user_metadata?.nickname||user.email)):'尚未登录';formEl.hidden=!!user;logoutEl.hidden=!user}
@@ -325,12 +376,13 @@ function errorText(error){
  if(/Email not confirmed/i.test(message))return '请先打开邮箱中的确认邮件，再回来登录。';
  return message||'请求失败，请检查网络后重试。';
 }
+let bootUser=null;
 try{
  cloudApi=await import('./supabase-cloud.js');
  if(!cloudApi.cloudReady)throw new Error('Supabase 项目尚未配置。等待连接云端项目后即可启用。');
- const user=await cloudApi.currentUser();
- showUser(user); await initializeCloudUser(user);
- showMessage(user?'Supabase 账号已连接。选择或创建团队即可同步积分。':'可以使用 Supabase 邮箱注册或登录。');
+ bootUser=await cloudApi.currentUser();
+ showUser(bootUser);
+ showMessage(bootUser?'账号已连接。':'登录或注册 POINTS 账号以继续。');
 }catch(error){
  statusEl.textContent='云端服务待配置';
  showMessage(errorText(error),true);
@@ -360,6 +412,7 @@ async function activateTeam(teamId,preferCloud){
    setTeamStatus('已连接团队 · 云端实时更新');
  });
  inviteBtn.hidden=false;
+ updateGate();
  setTeamStatus('已连接团队 · 云端实时更新');
  showMessage('团队已连接。成员、积分和流水开始同步。');
 }
@@ -367,8 +420,22 @@ async function initializeCloudUser(user){
  activeUserId=user?.id||'';
  teamControls.hidden=!user;
  if(!user)return;
- if(activeTeamId){try{await activateTeam(activeTeamId,true)}catch(e){setTeamStatus('团队连接失败：'+errorText(e))}}
+function updateGate(){
+ const hasAccount=!!activeUserId;
+ const hasTeam=!!activeTeamId&&inviteBtn.hidden===false;
+ document.body.classList.toggle('auth-required',!(hasAccount&&hasTeam));
+ if(!hasAccount){authTitle.textContent='欢迎加入 POINTS';authCaption.textContent='登录账号，继续管理你的团队积分';}
+ else if(!hasTeam){authTitle.textContent='加入你的团队';authCaption.textContent='创建团队，或输入团队邀请码继续';}
 }
+async function initializeCloudUser(user){
+ activeUserId=user?.id||'';
+ teamControls.hidden=!user;
+ if(!user){updateGate();return}
+ if(activeTeamId){try{await activateTeam(activeTeamId,true)}catch(e){setTeamStatus('团队连接失败：'+errorText(e))}}
+ updateGate();
+}
+await initializeCloudUser(bootUser);
+updateGate();
 createTeamBtn.addEventListener('click',async()=>{
  if(!cloudApi?.cloudReady||!activeUserId)return showMessage('请先登录云端账号。',true);
  const name=prompt('请输入团队名称');if(!name?.trim())return;
@@ -398,7 +465,7 @@ document.getElementById('cloudSignIn').addEventListener('click',async()=>{
  if(!cloudApi?.cloudReady)return showMessage('Supabase 云端项目尚未配置。',true);
  const email=emailEl.value.trim(),password=passwordEl.value;
  if(!email||!password)return showMessage('请填写邮箱和密码。',true);
- try{await cloudApi.login(email,password);const user=await cloudApi.currentUser();showUser(user);await initializeCloudUser(user);showMessage('登录成功。请创建团队或输入邀请码加入。');passwordEl.value=''}
+ try{await cloudApi.login(email,password);const user=await cloudApi.currentUser();showUser(user);await initializeCloudUser(user);updateGate();showMessage('登录成功。请创建团队或输入邀请码加入。');passwordEl.value=''}
  catch(error){showMessage(errorText(error),true)}
 });
 document.getElementById('cloudRegister').addEventListener('click',async()=>{
@@ -406,11 +473,11 @@ document.getElementById('cloudRegister').addEventListener('click',async()=>{
  const name=nameEl.value.trim(),email=emailEl.value.trim(),password=passwordEl.value;
  if(!name||!email||!password)return showMessage('注册请填写昵称、邮箱和密码。',true);
  if(password.length<8)return showMessage('密码至少需要 8 位。',true);
- try{await cloudApi.register(email,password,name);const user=await cloudApi.currentUser();showUser(user);await initializeCloudUser(user);showMessage(user?'账号注册成功，请创建团队或加入团队。':'注册成功，请检查邮箱确认链接。');passwordEl.value=''}
+ try{await cloudApi.register(email,password,name);const user=await cloudApi.currentUser();showUser(user);await initializeCloudUser(user);updateGate();showMessage(user?'账号注册成功，请创建团队或加入团队。':'注册成功，请检查邮箱确认链接。');passwordEl.value=''}
  catch(error){showMessage(errorText(error),true)}
 });
 logoutEl.addEventListener('click',async()=>{
- try{await cloudApi.logout();showUser(null);await initializeCloudUser(null);if(unsubscribeState){unsubscribeState();unsubscribeState=null}activeTeamId='';localStorage.removeItem('points-cloud-team');inviteBtn.hidden=true;showMessage('已退出登录。当前设备积分仍保存在本地。')}
+ try{await cloudApi.logout();showUser(null);activeTeamId='';await initializeCloudUser(null);updateGate();if(unsubscribeState){unsubscribeState();unsubscribeState=null}activeTeamId='';localStorage.removeItem('points-cloud-team');inviteBtn.hidden=true;showMessage('已退出登录。当前设备积分仍保存在本地。')}
  catch(error){showMessage(errorText(error),true)}
 });
 </script></body></html>
