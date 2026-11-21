@@ -2,10 +2,10 @@ import { FileTransfer } from '@capacitor/file-transfer';
 import { Filesystem, Directory } from '@capacitor/filesystem';
 import { FileOpener } from '@capacitor-community/file-opener';
 
-const APP_VERSION = 'T102';
+const APP_VERSION = 'T102.01';
 const REPOSITORY = 'kna58765-cpu/Points';
 const RELEASE_API = 'https://api.github.com/repos/' + REPOSITORY + '/releases?per_page=10';
-const T102_NOTES = '• 保留总览主页四分之一圆形空间背景与多层景深效果\\n• 优化圆形环带、球体高光与层次感，提升主界面空间氛围\\n• 优化账号页登出按钮视觉层次，采用柔和危险色与立体交互\\n• 明确退出云端账号不会删除本地积分数据，固定签名支持覆盖安装';
+const T102.01_NOTES = '• 保留总览主页四分之一圆形空间背景与多层景深效果\\n• 优化圆形环带、球体高光与层次感，提升主界面空间氛围\\n• 优化账号页登出按钮视觉层次，采用柔和危险色与立体交互\\n• 明确退出云端账号不会删除本地积分数据，固定签名支持覆盖安装';
 
 function versionNumber(value) {
   const match = String(value || '').match(/T?(\d+)/i);
@@ -27,7 +27,7 @@ export async function checkForUpdate() {
   const currentNumber = versionNumber(APP_VERSION);
   if (!latestNumber) throw new Error('正式版本标签格式不正确，无法识别版本号。');
   if (latestNumber <= currentNumber) return { updateAvailable: false, currentVersion: APP_VERSION };
-  const expected = 'T' + String(latestNumber).padStart(3, '0');
+  const expected = tag.toUpperCase().startsWith('T') ? tag.toUpperCase() : 'T' + tag;
   const apkAssets = (release.assets || []).filter(asset => /\.apk$/i.test(asset.name || '') && asset.browser_download_url);
   const asset = apkAssets.find(item => item.name.toUpperCase().includes(expected)) || (apkAssets.length === 1 ? apkAssets[0] : null);
   if (!asset) throw new Error('正式版本 ' + expected + ' 尚未上传 APK 安装包。已留在 POINTS 内，没有打开任何网站。');
@@ -79,7 +79,7 @@ export function consumeInstalledUpdate() {
   if (installed && installed !== APP_VERSION) {
     info = pending?.version === APP_VERSION
       ? pending
-      : { version: APP_VERSION, notes: T102_NOTES };
+      : { version: APP_VERSION, notes: T102.01_NOTES };
   }
 
   // A cancelled installation must not leave a stale "pending" success notice.
