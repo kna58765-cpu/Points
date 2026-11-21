@@ -47,6 +47,19 @@ jobs:
       - name: Sync Capacitor
         run: npx cap sync android
 
+      - name: Declare Android package installation permission
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('android/app/src/main/AndroidManifest.xml')
+          s = p.read_text()
+          permission = '    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />\\n'
+          if 'android.permission.REQUEST_INSTALL_PACKAGES' not in s:
+              s = s.replace('<application', permission + '    <application', 1)
+          p.write_text(s)
+          print('Declared REQUEST_INSTALL_PACKAGES for the Android package installer')
+          PY
+
       - name: Generate POINTS app icons
         run: node scripts/generate-android-icons.mjs
 
@@ -137,8 +150,8 @@ jobs:
           import re
           p = Path('android/app/build.gradle')
           s = p.read_text()
-          s, code_count = re.subn(r"versionCode\s+\d+", "versionCode 75082", s, count=1)
-          s, name_count = re.subn(r"""versionName\s+["'][^"']+["']""", 'versionName "T082"', s, count=1)
+          s, code_count = re.subn(r"versionCode\s+\d+", "versionCode 75083", s, count=1)
+          s, name_count = re.subn(r"""versionName\s+["'][^"']+["']""", 'versionName "T083"', s, count=1)
           if code_count != 1 or name_count != 1:
               raise SystemExit('Could not set Android versionCode/versionName')
           p.write_text(s)
@@ -161,13 +174,13 @@ jobs:
           ACTUAL_CERT="$(printf '%s\n' "$SIGNER_OUTPUT" | sed -n 's/.*certificate SHA-256 digest: //p' | head -n 1 | tr -d ':' | tr '[:upper:]' '[:lower:]')"
           test -n "$ACTUAL_CERT" && test "$ACTUAL_CERT" = "$EXPECTED_CERT" || { echo "APK signer fingerprint does not match the fixed POINTS signing certificate"; exit 1; }
           mkdir -p release-assets
-          cp "$APK" release-assets/POINTS-T082.apk
+          cp "$APK" release-assets/POINTS-T083.apk
 
       - name: Publish APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: POINTS-T082-Android-APK
-          path: release-assets/POINTS-T082.apk
+          name: POINTS-T083-Android-APK
+          path: release-assets/POINTS-T083.apk
           if-no-files-found: error
           retention-days: 30
 
@@ -180,22 +193,22 @@ jobs:
       - name: Download APK artifact
         uses: actions/download-artifact@v4
         with:
-          name: POINTS-T082-Android-APK
+          name: POINTS-T083-Android-APK
           path: release-assets
 
-      - name: Publish T082 release with APK
+      - name: Publish T083 release with APK
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: T082
-          name: POINTS T082
+          tag_name: T083
+          name: POINTS T083
           body: |
-            POINTS T082 正式版
+            POINTS T083 正式版
 
-            - 应用内版本号与正式 APK 统一为 T082
+            - 应用内版本号与正式 APK 统一为 T083
             - 修复团队邀请码生成后不可见的问题，支持直接复制分享
             - 验证手动检查更新流程与安装状态提示
             - 保持原固定签名，覆盖安装并保留数据
-          files: release-assets/POINTS-T082.apk
+          files: release-assets/POINTS-T083.apk
           draft: false
           prerelease: false
           make_latest: true
