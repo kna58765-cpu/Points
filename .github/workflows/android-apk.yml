@@ -83,11 +83,15 @@ jobs:
           export POINTS_KEYSTORE_PATH="$RUNNER_TEMP/points-release-key.jks"
           echo "POINTS_KEYSTORE_PATH=$POINTS_KEYSTORE_PATH" >> "$GITHUB_ENV"
           python3 - <<'PY'
+          import os
           from pathlib import Path
-          import re
           p = Path('android/app/build.gradle')
           s = p.read_text()
-          signing = '''
+          if 'signingConfigs {' not in s:
+              pos = s.find('buildTypes {')
+              if pos < 0:
+                  raise SystemExit('Gradle buildTypes block not found')
+              signing = '''
               signingConfigs {
                   release {
                       storeFile file(System.getenv("POINTS_KEYSTORE_PATH"))
@@ -96,19 +100,13 @@ jobs:
                       keyPassword System.getenv("POINTS_KEY_PASSWORD")
                   }
               }
-          '''
-          if 'signingConfigs {' not in s:
-              s, n = re.subn(r'(?m)^\\s*buildTypes\\s*\\{', signing + '\\n            buildTypes {', s, count=1)
-              if n != 1:
-                  raise SystemExit('Could not add fixed signing configuration')
-          if re.search(r'(?m)^\\s*debug\\s*\\{', s):
-              s, n = re.subn(r'(?m)^(\\s*)debug\\s*\\{', r'\\1debug {\\n\\1    signingConfig signingConfigs.release', s, count=1)
-              if n != 1:
-                  raise SystemExit('Could not configure debug signing')
-          else:
-              s, n = re.subn(r'(?m)^(\\s*)buildTypes\\s*\\{', r'\\1buildTypes {\\n\\1    debug { signingConfig signingConfigs.release }', s, count=1)
-              if n != 1:
-                  raise SystemExit('Could not add debug build type')
+              '''
+              s = s[:pos] + signing + s[pos:]
+          pos = s.find('buildTypes {')
+          if pos < 0:
+              raise SystemExit('Gradle buildTypes block not found after signing setup')
+          insert = pos + len('buildTypes {')
+          s = s[:insert] + '\\n        debug { signingConfig signingConfigs.release }' + s[insert:]
           p.write_text(s)
           PY
           keytool -list -v -keystore "$POINTS_KEYSTORE_PATH" -storepass "$POINTS_KEYSTORE_PASSWORD" -alias "$POINTS_KEY_ALIAS"
