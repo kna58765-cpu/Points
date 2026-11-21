@@ -689,7 +689,7 @@ function showUpdateToast(info){
 }
 try{
  const updateInfo=updater?.consumeInstalledUpdate();
- if(updateInfo){pendingToastInfo=updateInfo;if(activeUserId&&activeTeamId){updateToastShown=true;pendingToastInfo=null;requestAnimationFrame(()=>showUpdateToast(updateInfo));}}
+ if(updateInfo){pendingToastInfo=updateInfo;updateToastShown=true;pendingToastInfo=null;requestAnimationFrame(()=>showUpdateToast(updateInfo));}
 }catch(e){console.warn('Update toast skipped',e)}
 
 logoutEl.addEventListener('click',async()=>{
