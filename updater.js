@@ -6,7 +6,7 @@ const RELEASE_API = 'https://api.github.com/repos/' + REPOSITORY + '/releases/la
 const T075_NOTES = '• 新增独立账号页面\n• 新增 GitHub 正式版手动检查更新\n• 新增 APK 下载与版本升级提示\n• 新增底部弹出的更新完成动画\n• 优化账号信息与页面体验';
 
 function versionNumber(value) {
-  const match = String(value || '').match(/T?(\\d+)/i);
+  const match = String(value || '').match(/T?(\d+)/i);
   return match ? Number(match[1]) : 0;
 }
 function formatSize(bytes) {
@@ -25,13 +25,13 @@ export async function checkForUpdate() {
   if (!latestNumber) throw new Error('正式版本标签格式不正确，无法识别版本号。');
   if (latestNumber <= currentNumber) return { updateAvailable: false, currentVersion: APP_VERSION };
   const expected = 'T' + String(latestNumber).padStart(3, '0');
-  const apkAssets = (release.assets || []).filter(asset => /\\.apk$/i.test(asset.name || '') && asset.browser_download_url);
+  const apkAssets = (release.assets || []).filter(asset => /\.apk$/i.test(asset.name || '') && asset.browser_download_url);
   const asset = apkAssets.find(item => item.name.toUpperCase().includes(expected)) || (apkAssets.length === 1 ? apkAssets[0] : null);
   if (!asset) throw new Error('正式版本 ' + expected + ' 尚未上传可安装 APK，请联系发布者。');
   return { updateAvailable: true, version: expected, notes: String(release.body || '').trim(), sizeText: formatSize(asset.size), assetName: asset.name, downloadUrl: asset.browser_download_url, releaseUrl: release.html_url, publishedAt: release.published_at || '' };
 }
 export async function downloadUpdate(release) {
-  if (!release?.downloadUrl || !/^https:\\/\\//i.test(release.downloadUrl)) throw new Error('APK 下载地址无效。');
+  if (!release?.downloadUrl || !/^https:\/\//i.test(release.downloadUrl)) throw new Error('APK 下载地址无效。');
   localStorage.setItem('points.pendingUpdate', JSON.stringify({ version: release.version, notes: release.notes || '', assetName: release.assetName || '', releaseUrl: release.releaseUrl || '', requestedAt: Date.now() }));
   if (window.Capacitor?.isNativePlatform?.()) await Browser.open({ url: release.downloadUrl });
   else window.open(release.downloadUrl, '_blank', 'noopener');
