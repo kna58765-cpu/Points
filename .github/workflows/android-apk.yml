@@ -47,8 +47,53 @@ jobs:
       - name: Sync Capacitor
         run: npx cap sync android
 
-      - name: Generate Pis app icons
+      - name: Generate POINTS app icons
         run: node scripts/generate-android-icons.mjs
+
+      - name: Configure fixed POINTS signing key
+        env:
+          POINTS_KEYSTORE_BASE64: ${{ secrets.POINTS_KEYSTORE_BASE64 }}
+          POINTS_KEYSTORE_PASSWORD: ${{ secrets.POINTS_KEYSTORE_PASSWORD }}
+          POINTS_KEY_ALIAS: ${{ secrets.POINTS_KEY_ALIAS }}
+          POINTS_KEY_PASSWORD: ${{ secrets.POINTS_KEY_PASSWORD }}
+        run: |
+          set -euo pipefail
+          test -n "$POINTS_KEYSTORE_BASE64" || { echo "Missing POINTS_KEYSTORE_BASE64 repository secret"; exit 1; }
+          test -n "$POINTS_KEYSTORE_PASSWORD" || { echo "Missing POINTS_KEYSTORE_PASSWORD repository secret"; exit 1; }
+          test -n "$POINTS_KEY_ALIAS" || { echo "Missing POINTS_KEY_ALIAS repository secret"; exit 1; }
+          test -n "$POINTS_KEY_PASSWORD" || { echo "Missing POINTS_KEY_PASSWORD repository secret"; exit 1; }
+          echo "$POINTS_KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/points-release-key.jks"
+          echo "POINTS_KEYSTORE_PATH=$RUNNER_TEMP/points-release-key.jks" >> "$GITHUB_ENV"
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          p = Path('android/app/build.gradle')
+          s = p.read_text()
+          signing = '''
+              signingConfigs {
+                  release {
+                      storeFile file(System.getenv("POINTS_KEYSTORE_PATH"))
+                      storePassword System.getenv("POINTS_KEYSTORE_PASSWORD")
+                      keyAlias System.getenv("POINTS_KEY_ALIAS")
+                      keyPassword System.getenv("POINTS_KEY_PASSWORD")
+                  }
+              }
+          '''
+          if 'signingConfigs {' not in s:
+              s, n = re.subn(r'(?m)^\s*buildTypes\s*\{', signing + '\n            buildTypes {', s, count=1)
+              if n != 1:
+                  raise SystemExit('Could not add fixed signing configuration')
+          if re.search(r'(?m)^\s*debug\s*\{', s):
+              s, n = re.subn(r'(?m)^(\s*)debug\s*\{', r'\1debug {\n\1    signingConfig signingConfigs.release', s, count=1)
+              if n != 1:
+                  raise SystemExit('Could not configure debug signing')
+          else:
+              s, n = re.subn(r'(?m)^(\s*)buildTypes\s*\{', r'\1buildTypes {\n\1    debug { signingConfig signingConfigs.release }', s, count=1)
+              if n != 1:
+                  raise SystemExit('Could not add debug build type')
+          p.write_text(s)
+          PY
+          keytool -list -v -keystore "$POINTS_KEYSTORE_PATH" -storepass "$POINTS_KEYSTORE_PASSWORD" -alias "$POINTS_KEY_ALIAS" | grep 'SHA256:'
 
       - name: Set Android app version
         run: |
@@ -57,22 +102,33 @@ jobs:
           import re
           p = Path('android/app/build.gradle')
           s = p.read_text()
-          s, code_count = re.subn(r'versionCode\s+\d+', 'versionCode 75077', s, count=1)
-          s, name_count = re.subn(r'versionName\s+[\'\"][^\'\"]+[\'\"]', 'versionName "T077"', s, count=1)
+          s, code_count = re.subn(r'versionCode\s+\d+', 'versionCode 75080', s, count=1)
+          s, name_count = re.subn(r'versionName\s+[\'\"][^\'\"]+[\'\"]', 'versionName "T080"', s, count=1)
           if code_count != 1 or name_count != 1:
               raise SystemExit('Could not set Android versionCode/versionName')
           p.write_text(s)
           PY
 
-      - name: Build debug APK
+      - name: Build signed APK
         working-directory: android
+        env:
+          POINTS_KEYSTORE_PASSWORD: ${{ secrets.POINTS_KEYSTORE_PASSWORD }}
+          POINTS_KEY_ALIAS: ${{ secrets.POINTS_KEY_ALIAS }}
+          POINTS_KEY_PASSWORD: ${{ secrets.POINTS_KEY_PASSWORD }}
         run: ./gradlew assembleDebug --no-daemon
+
+      - name: Verify APK signature
+        run: |
+          APK=android/app/build/outputs/apk/debug/app-debug.apk
+          "$ANDROID_HOME/build-tools/36.0.0/apksigner" verify --print-certs "$APK"
+          mkdir -p release-assets
+          cp "$APK" release-assets/POINTS-T080.apk
 
       - name: Publish APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: POINTS-T077-Android-APK
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          name: POINTS-T080-Android-APK
+          path: release-assets/POINTS-T080.apk
           if-no-files-found: error
           retention-days: 30
 
@@ -85,22 +141,22 @@ jobs:
       - name: Download APK artifact
         uses: actions/download-artifact@v4
         with:
-          name: POINTS-T077-Android-APK
+          name: POINTS-T080-Android-APK
           path: release-assets
 
-      - name: Publish T077 release with APK
+      - name: Publish T080 release with APK
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: T077
-          name: POINTS T077
+          tag_name: T080
+          name: POINTS T080
           body: |
-            POINTS T077 正式版
+            POINTS T080 正式版
 
-            - 页面布局更宽松，增加留白与行高
-            - 液态玻璃调整为柔和毛玻璃材质
-            - 优化窄屏文字显示，减少截断
-            - 重点验证 T076 应用内更新流程
-          files: release-assets/app-debug.apk
+            - 修复上一代更新流程遗留问题
+            - 只有实际安装新版本后才显示更新完成动画
+            - 取消安装不会误报成功
+            - 统一固定 APK 签名，支持后续覆盖更新
+          files: release-assets/POINTS-T080.apk
           draft: false
           prerelease: false
           make_latest: true
