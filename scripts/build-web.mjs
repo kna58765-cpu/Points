@@ -30,8 +30,8 @@ try {
 // Bundle the Supabase SDK into the app. Never fetch esm.sh at runtime: that
 // CDN can be unreachable on VPN-free mobile networks and leave the splash stuck.
 await build({
-  entryPoints: ['supabase-cloud.js'],
-  outfile: 'www/supabase-cloud.js',
+  entryPoints: ['supabase-cloud.js', 'updater.js'],
+  outdir: 'www',
   bundle: true,
   platform: 'browser',
   format: 'esm',
