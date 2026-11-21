@@ -405,6 +405,29 @@ nav button.active{transform:translateY(-1px)}
  nav,.control-menu,.modal,#updateToast{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
 }
 
+
+/* T085 invite reveal and calmer update motion */
+.invite-reveal-backdrop{position:fixed;inset:0;z-index:120;display:flex;align-items:center;justify-content:center;padding:22px;background:rgba(15,15,15,.34);-webkit-backdrop-filter:blur(12px) saturate(1.12);backdrop-filter:blur(12px) saturate(1.12)}
+.invite-reveal-backdrop[hidden]{display:none!important}
+.invite-reveal-card{position:relative;width:min(100%,420px);padding:28px 22px 22px;border:1px solid rgba(255,255,255,.92);border-radius:28px;background:linear-gradient(150deg,rgba(255,255,255,.98),rgba(247,247,247,.94));box-shadow:0 24px 80px rgba(0,0,0,.22),inset 0 1px 0 #fff;text-align:center;animation:inviteRevealIn .52s cubic-bezier(.16,1,.3,1) both}
+.invite-reveal-close{position:absolute;right:14px;top:14px;width:34px;height:34px;border:0;border-radius:50%;background:#f0f0f0;color:#777;font-size:22px;line-height:1}
+.invite-reveal-mark{font-size:10px;font-weight:850;letter-spacing:2.4px;color:#999}
+.invite-reveal-card h3{margin:12px 0 7px;font-size:23px;letter-spacing:-.7px}
+.invite-reveal-card p{margin:0 auto;color:#777;font-size:13px;line-height:1.65;max-width:290px}
+.invite-reveal-code{margin:22px 0 9px;padding:19px 12px;border:1px dashed #c9c9c9;border-radius:18px;background:#fff;color:#111;font-size:clamp(27px,8vw,36px);font-weight:950;letter-spacing:4px;line-height:1.35;overflow-wrap:anywhere;user-select:all;-webkit-user-select:all;font-variant-numeric:tabular-nums}
+.invite-reveal-meta{font-size:12px;color:#999}
+.invite-reveal-copy{width:100%;min-height:50px;margin-top:20px}
+@keyframes inviteRevealIn{from{opacity:0;transform:translateY(15px) scale(.975)}to{opacity:1;transform:translateY(0) scale(1)}}
+#updateToast{transition:opacity .25s ease,visibility .25s ease}
+#updateToast.show{animation:updateToastIn .68s cubic-bezier(.16,1,.3,1) forwards}
+@keyframes updateToastIn{0%{opacity:0;transform:translate(-50%,18px) scale(.985)}70%{opacity:1;transform:translate(-50%,-2px) scale(1.003)}100%{opacity:1;transform:translate(-50%,0) scale(1)}}
+@keyframes updateToastOut{from{opacity:1;transform:translate(-50%,0) scale(1)}to{opacity:0;transform:translate(-50%,12px) scale(.99)}}
+.update-toast-check{animation:updateCheckIn .55s cubic-bezier(.16,1,.3,1) both}
+@keyframes updateCheckIn{0%{opacity:0;transform:scale(.72) rotate(-12deg)}75%{opacity:1;transform:scale(1.08) rotate(3deg)}100%{opacity:1;transform:scale(1) rotate(0)}}
+#downloadProgressBar{background:linear-gradient(90deg,#16834a,#48ad78,#16834a)!important;background-size:200% 100%;transition:width .42s cubic-bezier(.22,.8,.25,1)!important}
+#downloadProgressWrap:not([hidden]) #downloadProgressBar{animation:progressGlow 2.4s ease-in-out infinite}
+@keyframes progressGlow{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+@media(prefers-reduced-motion:reduce){.invite-reveal-card,.update-toast-check,#updateToast.show,#updateToast.hide,#downloadProgressWrap:not([hidden]) #downloadProgressBar{animation:none!important}.invite-reveal-card{opacity:1;transform:none}}
 </style></head>
 <body class="auth-required"><section id="authGate"><div class="auth-brand"><div class="auth-logo">P<span>.</span></div><div class="auth-wordmark">POINTS</div><p>每一分，都有迹可循。</p></div><div id="authGateSlot"></div><script>document.addEventListener("DOMContentLoaded",function(){var gate=document.getElementById("authGateSlot"),panel=document.getElementById("cloudAuth");if(gate&&panel)gate.appendChild(panel);});</script><div class="auth-foot">安全登录 · 团队协作 · 实时积分</div></section><main class="app">
 <header><div><div class="brand">POINTS<span> / SCORE</span></div><div class="app-version">T084</div></div><div class="sub">Supabase 云端同步 · T084</div></header>
@@ -481,6 +504,17 @@ nav button.active{transform:translateY(-1px)}
 </main>
 <nav id="mainNav"><button class="active" type="button" data-page="overview">◉ 总览</button><button type="button" data-page="rank">▤ 排行</button><button type="button" data-page="members">♙ 成员</button><button type="button" data-page="history">≡ 流水</button><button type="button" data-page="audit">≡ 操作</button><button type="button" data-page="team">♧ 团队</button><button type="button" data-page="account">◎ 账号</button></nav>
 <aside id="updateToast" aria-live="polite" aria-atomic="true"><div class="update-toast-head"><span class="update-toast-check">✓</span><div><b>更新完成</b><small id="updateToastVersion">POINTS T084 已成功安装</small></div><button type="button" id="updateToastClose" aria-label="关闭">×</button></div><div class="update-toast-label">本次更新内容</div><div id="updateToastNotes"></div></aside>
+<div class="invite-reveal-backdrop" id="inviteReveal" hidden role="dialog" aria-modal="true" aria-labelledby="inviteRevealTitle">
+ <section class="invite-reveal-card">
+  <button class="invite-reveal-close" id="inviteRevealClose" type="button" aria-label="关闭">×</button>
+  <div class="invite-reveal-mark">POINTS · TEAM</div>
+  <h3 id="inviteRevealTitle">团队邀请码已生成</h3>
+  <p>把下面的邀请码发送给团队成员，即可加入团队。</p>
+  <div class="invite-reveal-code" id="inviteRevealValue">------</div>
+  <div class="invite-reveal-meta">有效期 7 天 · 最多 30 人使用</div>
+  <button class="plain ui-btn primary invite-reveal-copy" id="inviteRevealCopy" type="button">复制邀请码</button>
+ </section>
+</div>
 <div class="modal-bg" id="modal"><div class="modal"><h3 id="modalTitle">添加成员</h3><label class="sub">成员名称</label><input class="field" id="nameInput" maxlength="24" placeholder="输入成员名称"><label class="sub" id="groupLabel">所属分组</label><input class="field" id="groupInput" maxlength="20" placeholder="例如：一班、二班、管理员组"><label class="sub hide" id="colorLabel">头像颜色</label><select class="field hide" id="colorInput"><option value="#111111">黑色</option><option value="#555555">深灰</option><option value="#777777">灰色</option><option value="#9a9a9a">浅灰</option><option value="#333333">炭黑</option></select><label class="sub" id="amountLabel">积分数值</label><input class="field" id="amountInput" type="number" min="1" max="99999" placeholder="例如 10"><label class="sub hide" id="noteLabel">备注（选填）</label><input class="field hide" id="noteInput" maxlength="80" placeholder="例如：完成任务、迟到"><div class="modal-actions"><button class="outline" id="deleteMember" style="display:none">删除成员</button><button class="outline" id="cancel">取消</button><button class="plain" id="confirm">确认</button></div></div></div>
 <div class="modal-bg" id="detailModal"><div class="modal" style="max-height:85dvh;overflow:auto"><div style="display:flex;justify-content:space-between"><h3 id="detailName">成员详情</h3><button class="outline" id="closeDetail">关闭</button></div><div class="hero" style="margin:8px 0 14px;padding:20px"><div><small>MEMBER TOTAL POINTS</small><div class="total" id="detailPoints">0</div></div></div><div class="stats"><div class="stat"><label>累计加分</label><strong id="detailEarned">0</strong></div><div class="stat"><label>累计扣分</label><strong id="detailSpent">0</strong></div><div class="stat"><label>记录次数</label><strong id="detailCount">0</strong></div></div><div class="section-head"><h2>全部积分记录</h2></div><section class="panel" id="detailHistory"></section></div></div><script>
 const KEY='points-v1';let data=JSON.parse(localStorage.getItem(KEY)||'null')||{members:[],logs:[]};data.settings=Object.assign({maxAdd:99999,maxDeduct:99999},data.settings||{});data.audit=Array.isArray(data.audit)?data.audit:[];let mode='member',target=null;let adminMode=true;
@@ -845,12 +879,19 @@ inviteBtn.addEventListener('click',async()=>{
   renderInviteCode(code);
   localStorage.setItem('points-invite-'+activeTeamId,JSON.stringify({code:generatedInviteCode,createdAt:Date.now()}));
   showPage('team');
+  const reveal=document.getElementById('inviteReveal');
+  const revealValue=document.getElementById('inviteRevealValue');
+  if(revealValue)revealValue.textContent=generatedInviteCode;
+  if(reveal)reveal.hidden=false;
   requestAnimationFrame(()=>inviteResult.scrollIntoView({behavior:'smooth',block:'center'}));
-  showMessage('邀请码已生成，可直接复制并发送给成员。');
+  showMessage('邀请码已生成，已在屏幕中央显示，可复制并发送给成员。');
  }
  catch(e){showMessage('生成邀请码失败：'+errorText(e),true)}
  finally{inviteBtn.disabled=false;inviteBtn.textContent='生成邀请码'}
 });
+document.getElementById('inviteRevealClose')?.addEventListener('click',()=>{document.getElementById('inviteReveal').hidden=true});
+document.getElementById('inviteReveal')?.addEventListener('click',event=>{if(event.target.id==='inviteReveal')event.currentTarget.hidden=true});
+document.getElementById('inviteRevealCopy')?.addEventListener('click',()=>copyInviteBtn.click());
 copyInviteBtn.addEventListener('click',async()=>{
  if(!generatedInviteCode)return showMessage('请先生成邀请码。',true);
  try{if(navigator.clipboard&&window.isSecureContext){await navigator.clipboard.writeText(generatedInviteCode)}else{const box=document.createElement('textarea');box.value=generatedInviteCode;box.style.position='fixed';box.style.opacity='0';document.body.appendChild(box);box.select();const ok=document.execCommand('copy');box.remove();if(!ok)throw new Error('复制权限不可用')}
