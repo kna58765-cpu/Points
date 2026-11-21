@@ -31,7 +31,7 @@ export async function checkForUpdate() {
   return { updateAvailable: true, version: expected, notes: String(release.body || '').trim(), sizeText: formatSize(asset.size), assetName: asset.name, downloadUrl: asset.browser_download_url, releaseUrl: release.html_url, publishedAt: release.published_at || '' };
 }
 export async function downloadUpdate(release) {
-  if (!release?.downloadUrl || !/^https:\/\//i.test(release.downloadUrl)) throw new Error('APK 下载地址无效。');
+  if (!release?.downloadUrl || !String(release.downloadUrl).startsWith('https://')) throw new Error('APK 下载地址无效。');
   localStorage.setItem('points.pendingUpdate', JSON.stringify({ version: release.version, notes: release.notes || '', assetName: release.assetName || '', releaseUrl: release.releaseUrl || '', requestedAt: Date.now() }));
   if (window.Capacitor?.isNativePlatform?.()) await Browser.open({ url: release.downloadUrl });
   else window.open(release.downloadUrl, '_blank', 'noopener');
