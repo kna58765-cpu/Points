@@ -66,19 +66,37 @@ jobs:
           import base64, os, re
           from pathlib import Path
           raw = os.environ["POINTS_KEYSTORE_BASE64"]
-          # Normalize BOM, pasted whitespace/wrapping, and optional surrounding quotes.
+          # GitHub secret may contain wrapped, quoted, URL-safe, or accidentally
+          # double-Base64-encoded data. Normalize without ever printing it.
           raw = raw.lstrip("\\ufeff").strip().strip("\\\"'")
-          # Accept only Base64 alphabet and padding; never print secret material.
-          cleaned = re.sub(r"[^A-Za-z0-9+/=_-]", "", raw).replace("-", "+").replace("_", "/")
-          cleaned = cleaned.rstrip("=")
+          cleaned = re.sub(r"[^A-Za-z0-9+/=_-]", "", raw).replace("-", "+").replace("_", "/").rstrip("=")
           cleaned += "=" * ((4 - len(cleaned) % 4) % 4)
           try:
               data = base64.b64decode(cleaned, validate=True)
           except Exception:
-              raise SystemExit("POINTS_KEYSTORE_BASE64 is not valid Base64 after safe whitespace/format normalization")
+              raise SystemExit("Keystore secret is not valid Base64; replace it with Base64 of the original signing file")
+          # If the first decode is still printable Base64, decode exactly one more time.
+          text_data = data.decode("ascii", errors="ignore")
+          compact = re.sub(r"\\s+", "", text_data)
+          if len(compact) > 100 and re.fullmatch(r"[A-Za-z0-9+/=_-]+", compact):
+              try:
+                  second = base64.b64decode(compact.replace("-", "+").replace("_", "/"), validate=False)
+                  if second and second != data:
+                      data = second
+              except Exception:
+                  pass
           if not data:
-              raise SystemExit("POINTS_KEYSTORE_BASE64 decoded to an empty file")
-          Path(os.environ["RUNNER_TEMP"], "points-release-key.jks").write_bytes(data)
+              raise SystemExit("Decoded signing keystore is empty")
+          # Report only the file format, never key or password contents.
+          if data.startswith(bytes.fromhex("feedfeed")):
+              store_type = "JKS"
+          elif data.startswith(b"\\x30"):
+              store_type = "PKCS12"
+          else:
+              raise SystemExit("Decoded secret is not a JKS/PKCS12 keystore. Re-encode the original .jks/.p12 file as Base64 and update POINTS_KEYSTORE_BASE64.")
+          key_path = Path(os.environ["RUNNER_TEMP"], "points-release-key." + ("jks" if store_type == "JKS" else "p12"))
+          key_path.write_bytes(data)
+          Path(os.environ["RUNNER_TEMP"], "points-keystore-type").write_text(store_type)
           PY
           export POINTS_KEYSTORE_PATH="$RUNNER_TEMP/points-release-key.jks"
           echo "POINTS_KEYSTORE_PATH=$POINTS_KEYSTORE_PATH" >> "$GITHUB_ENV"
@@ -109,7 +127,8 @@ jobs:
           s = s[:insert] + '\\n        debug { signingConfig signingConfigs.release }' + s[insert:]
           p.write_text(s)
           PY
-          keytool -list -v -keystore "$POINTS_KEYSTORE_PATH" -storepass "$POINTS_KEYSTORE_PASSWORD" -alias "$POINTS_KEY_ALIAS"
+          STORE_TYPE="$(cat "$RUNNER_TEMP/points-keystore-type")"
+          keytool -list -v -storetype "$STORE_TYPE" -keystore "$POINTS_KEYSTORE_PATH" -storepass "$POINTS_KEYSTORE_PASSWORD" -alias "$POINTS_KEY_ALIAS"
 
       - name: Set Android app version
         run: |
