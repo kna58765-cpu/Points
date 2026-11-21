@@ -71,8 +71,17 @@ export function consumeInstalledUpdate() {
   try { pending = JSON.parse(localStorage.getItem('points.pendingUpdate') || 'null'); } catch {}
   const installed = localStorage.getItem('points.installedVersion') || '';
   let info = null;
-  if (pending?.version === APP_VERSION) info = pending;
-  else if (installed && installed !== APP_VERSION) info = { version: APP_VERSION, notes: T077_NOTES };
+
+  // Opening Android's installer is only a request, not proof that the user
+  // completed installation. Show the success animation only after the app
+  // starts with a version different from the version recorded on last launch.
+  if (installed && installed !== APP_VERSION) {
+    info = pending?.version === APP_VERSION
+      ? pending
+      : { version: APP_VERSION, notes: T077_NOTES };
+  }
+
+  // A cancelled installation must not leave a stale "pending" success notice.
   localStorage.removeItem('points.pendingUpdate');
   localStorage.setItem('points.installedVersion', APP_VERSION);
   return info;
