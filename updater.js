@@ -66,7 +66,7 @@ export function consumeInstalledUpdate() {
   const installed = localStorage.getItem('points.installedVersion') || '';
   let info = null;
   if (pending?.version === APP_VERSION) info = pending;
-  else if (!installed && APP_VERSION === 'T076') info = { version: APP_VERSION, notes: T075_NOTES };
+  else if (!installed && APP_VERSION === 'T076') info = { version: APP_VERSION, notes: T076_NOTES };
   else if (installed && installed !== APP_VERSION) info = { version: APP_VERSION, notes: T075_NOTES };
   localStorage.removeItem('points.pendingUpdate');
   localStorage.setItem('points.installedVersion', APP_VERSION);
