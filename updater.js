@@ -2,10 +2,10 @@ import { FileTransfer } from '@capacitor/file-transfer';
 import { Filesystem, Directory } from '@capacitor/filesystem';
 import { FileOpener } from '@capacitor-community/file-opener';
 
-const APP_VERSION = 'T091';
+const APP_VERSION = 'T092';
 const REPOSITORY = 'kna58765-cpu/Points';
 const RELEASE_API = 'https://api.github.com/repos/' + REPOSITORY + '/releases/latest';
-const T091_NOTES = '• 优化主界面布局、按钮与卡片细节\\n• 邀请码改为每 24 小时自动随机轮换，无需手动生成\\n• 最新邀请码直接显示在邀请码按钮内，点击即可复制\\n• 保持原固定签名，支持覆盖安装并保留数据';
+const T092_NOTES = '• 移除团队、邀请码和团队协作入口\\n• 仅保留邮箱注册与邮箱登录\\n• 积分数据迁移为个人账号独立云同步\\n• 保留已有成员、积分、流水和设置\\n• 保持原固定签名，支持覆盖安装并保留数据';
 
 function versionNumber(value) {
   const match = String(value || '').match(/T?(\d+)/i);
@@ -78,7 +78,7 @@ export function consumeInstalledUpdate() {
   if (installed && installed !== APP_VERSION) {
     info = pending?.version === APP_VERSION
       ? pending
-      : { version: APP_VERSION, notes: T091_NOTES };
+      : { version: APP_VERSION, notes: T092_NOTES };
   }
 
   // A cancelled installation must not leave a stale "pending" success notice.
