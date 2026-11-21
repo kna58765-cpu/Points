@@ -431,7 +431,7 @@ nav button.active{transform:translateY(-1px)}
 @media(prefers-reduced-motion:reduce){.invite-reveal-card,.update-toast-check,#updateToast.show,#updateToast.hide,#downloadProgressWrap:not([hidden]) #downloadProgressBar{animation:none!important}.invite-reveal-card{opacity:1;transform:none}}
 </style></head>
 <body class="auth-required"><section id="authGate"><div class="auth-brand"><div class="auth-logo">P<span>.</span></div><div class="auth-wordmark">POINTS</div><p>每一分，都有迹可循。</p></div><div id="authGateSlot"></div><script>document.addEventListener("DOMContentLoaded",function(){var gate=document.getElementById("authGateSlot"),panel=document.getElementById("cloudAuth");if(gate&&panel)gate.appendChild(panel);});</script><div class="auth-foot">安全登录 · 团队协作 · 实时积分</div></section><main class="app">
-<header><div><div class="brand">POINTS<span> / SCORE</span></div><div class="app-version">T086</div></div><div class="sub">Supabase 云端同步 · T086</div></header>
+<header><div><div class="brand">POINTS<span> / SCORE</span></div><div class="app-version">T087</div></div><div class="sub">Supabase 云端同步 · T087</div></header>
 <section class="panel" id="cloudAuth" style="padding:18px;margin:0 0 18px">
   <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
     <div><b>云端账号</b><div class="muted" id="cloudStatus">尚未登录 · 等待 Supabase 项目配置</div></div>
@@ -452,14 +452,16 @@ nav button.active{transform:translateY(-1px)}
       <button class="outline" id="cloudCreateTeam" type="button">创建团队</button>
       <input class="field" id="cloudInviteCode" maxlength="16" placeholder="输入团队邀请码" style="flex:1;min-width:130px;margin:0">
       <button class="outline" id="cloudJoinTeam" type="button">加入团队</button>
-      <button class="plain" id="cloudMakeInvite" type="button" hidden>生成邀请码</button>
       <button class="outline" id="cloudDissolveTeam" type="button" hidden style="background:#fff0f0;border:1px solid #e5484d;color:#d92d35;font-weight:800">解散团队</button>
     </div>
-    <div id="cloudInviteResult" class="invite-card" hidden>
+    <div id="inviteGenerateArea" style="margin-top:14px">
+      <button class="plain" id="cloudMakeInvite" type="button" hidden style="width:100%;min-height:50px">生成邀请码</button>
+      <div id="cloudInviteResult" class="invite-card" hidden>
       <div class="invite-card-label">已生成的邀请码 · 复制后发给团队成员</div>
       <div class="invite-code" id="cloudInviteValue">------</div>
       <div class="invite-meta" id="cloudInviteMeta">最多 30 人使用 · 有效期 7 天</div>
       <button class="plain ui-btn primary invite-copy" id="cloudCopyInvite" type="button" hidden>复制邀请码</button>
+      </div>
     </div>
   </div>
   <div class="muted" id="cloudMessage" role="status" style="margin-top:10px">POINTS 正在从 Appwrite 迁移到 Supabase。账号与积分同步分阶段启用。</div>
@@ -508,7 +510,7 @@ nav button.active{transform:translateY(-1px)}
 <section class="page-view" data-view="audit"><div class="section-head"><h2>操作记录</h2><span class="sub">最近 50 条</span></div><section class="panel" id="auditHistory"></section></section>
 </main>
 <nav id="mainNav"><button class="active" type="button" data-page="overview">◉ 总览</button><button type="button" data-page="rank">▤ 排行</button><button type="button" data-page="members">♙ 成员</button><button type="button" data-page="history">≡ 流水</button><button type="button" data-page="audit">≡ 操作</button><button type="button" data-page="team">♧ 团队</button><button type="button" data-page="account">◎ 账号</button></nav>
-<aside id="updateToast" aria-live="polite" aria-atomic="true"><div class="update-toast-head"><span class="update-toast-check">✓</span><div><b>更新完成</b><small id="updateToastVersion">POINTS T086 已成功安装</small></div><button type="button" id="updateToastClose" aria-label="关闭">×</button></div><div class="update-toast-label">本次更新内容</div><div id="updateToastNotes"></div></aside>
+<aside id="updateToast" aria-live="polite" aria-atomic="true"><div class="update-toast-head"><span class="update-toast-check">✓</span><div><b>更新完成</b><small id="updateToastVersion">POINTS T087 已成功安装</small></div><button type="button" id="updateToastClose" aria-label="关闭">×</button></div><div class="update-toast-label">本次更新内容</div><div id="updateToastNotes"></div></aside>
 <div class="invite-reveal-backdrop" id="inviteReveal" hidden role="dialog" aria-modal="true" aria-labelledby="inviteRevealTitle">
  <section class="invite-reveal-card">
   <button class="invite-reveal-close" id="inviteRevealClose" type="button" aria-label="关闭">×</button>
@@ -884,20 +886,8 @@ inviteBtn.addEventListener('click',async()=>{
   renderInviteCode(code);
   localStorage.setItem('points-invite-'+activeTeamId,JSON.stringify({code:generatedInviteCode,createdAt:Date.now()}));
   showPage('team');
-  const reveal=document.getElementById('inviteReveal');
-  const revealValue=document.getElementById('inviteRevealValue');
-  if(revealValue)revealValue.textContent=generatedInviteCode;
-  if(reveal){
-   reveal.hidden=false;
-   reveal.removeAttribute('hidden');
-   reveal.classList.add('is-open');
-   reveal.style.setProperty('display','flex','important');
-   reveal.style.visibility='visible';
-   reveal.style.opacity='1';
-   reveal.style.pointerEvents='auto';
-  }
   requestAnimationFrame(()=>inviteResult.scrollIntoView({behavior:'smooth',block:'center'}));
-  showMessage('邀请码已生成，已在屏幕中央显示，可复制并发送给成员。');
+  showMessage('邀请码已生成，已显示在「生成邀请码」按钮下方，可复制并发送给成员。');
  }
  catch(e){showMessage('生成邀请码失败：'+errorText(e),true)}
  finally{inviteBtn.disabled=false;inviteBtn.textContent='生成邀请码'}
