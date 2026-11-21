@@ -388,7 +388,7 @@ nav button.active{background:rgba(20,20,20,.94)!important;color:#fff!important;b
  <section class="panel" style="padding:16px;margin-bottom:14px;display:grid;gap:10px">
   <button class="outline ui-btn secondary" id="accountLogout" type="button">登出账号</button>
   <button class="plain ui-btn primary" id="accountCheckUpdate" type="button">检查更新</button>
-  <div id="updateStatus" class="muted" role="status">点击检查更新，获取 POINTS 最新正式版本。</div>
+  <div id="updateStatus" class="muted" role="status">检查 GitHub 正式版本。新版下载后由安卓系统确认覆盖更新，无需先卸载，应用数据会保留。</div>
   <section id="updateResult" hidden style="border:1px solid #e8e8e8;border-radius:16px;padding:14px;background:#fafafa">
    <div style="display:flex;justify-content:space-between;gap:10px;align-items:center"><b id="updateVersion">发现新版本</b><span class="muted" id="updateSize"></span></div>
    <div id="updateNotes" style="white-space:pre-wrap;line-height:1.65;font-size:13px;color:#555;margin:10px 0"></div>
@@ -396,7 +396,7 @@ nav button.active{background:rgba(20,20,20,.94)!important;color:#fff!important;b
     <div id="downloadProgressText" class="muted" style="margin-bottom:7px">准备下载官方 APK…</div>
     <div style="height:7px;background:#e9e9e9;border-radius:99px;overflow:hidden"><div id="downloadProgressBar" style="height:100%;width:0;background:#16834a;border-radius:99px;transition:width .18s"></div></div>
    </div>
-   <button class="plain ui-btn primary" id="downloadUpdate" type="button" style="width:100%">下载并安装</button>
+   <button class="plain ui-btn primary" id="downloadUpdate" type="button" style="width:100%">下载 APK 并打开系统安装器</button>
   </section>
  </section>
  <section class="panel" style="padding:16px;border-color:#f1dada;margin-top:18px">
@@ -704,7 +704,7 @@ accountCheckUpdate?.addEventListener('click',async()=>{
   if(!result.updateAvailable){updateStatus.textContent='当前已是最新正式版本（'+result.currentVersion+'）。';return}
   availableUpdate=result;updateVersion.textContent='发现新版本 '+result.version;
   updateSize.textContent=result.sizeText;updateNotes.textContent=result.notes||'本次更新暂无文字说明。';
-  updateResult.hidden=false;updateStatus.textContent='已找到官方正式版本，可以下载安装。';
+  updateResult.hidden=false;updateStatus.textContent='已找到官方正式版本。下载后请在安卓安装弹窗点「更新」，直接覆盖当前版本；无需卸载。';
  }catch(error){updateStatus.textContent=error.message||'检查更新失败，请稍后重试。'}
  finally{accountCheckUpdate.disabled=false;accountCheckUpdate.textContent='检查更新'}
 });
