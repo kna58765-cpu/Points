@@ -157,8 +157,9 @@ jobs:
           APK=android/app/build/outputs/apk/debug/app-debug.apk
           SIGNER_OUTPUT="$("$ANDROID_HOME/build-tools/36.0.0/apksigner" verify --print-certs "$APK")"
           echo "$SIGNER_OUTPUT"
-          EXPECTED_CERT="FE:1F:41:16:FC:A2:FA:F2:B7:9A:3A:92:29:6C:99:D2:39:6B:F8:B5:DE:E1:C7:53:94:25:25:FF:F9:A4:AE:DC"
-          echo "$SIGNER_OUTPUT" | grep -Fiq "$EXPECTED_CERT" || { echo "APK signer fingerprint does not match the fixed POINTS signing certificate"; exit 1; }
+          EXPECTED_CERT="fe1f4116fca2faf2b79a3a92296c99d2396bf8b5dee1c753942525fff9a4aedc"
+          ACTUAL_CERT="$(printf '%s\n' "$SIGNER_OUTPUT" | sed -n 's/.*certificate SHA-256 digest: //p' | head -n 1 | tr -d ':' | tr '[:upper:]' '[:lower:]')"
+          test -n "$ACTUAL_CERT" && test "$ACTUAL_CERT" = "$EXPECTED_CERT" || { echo "APK signer fingerprint does not match the fixed POINTS signing certificate"; exit 1; }
           mkdir -p release-assets
           cp "$APK" release-assets/POINTS-T082.apk
 
