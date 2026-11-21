@@ -150,8 +150,8 @@ jobs:
           import re
           p = Path('android/app/build.gradle')
           s = p.read_text()
-          s, code_count = re.subn(r"versionCode\s+\d+", "versionCode 75300", s, count=1)
-          s, name_count = re.subn(r"""versionName\s+["'][^"']+["']""", 'versionName "T101"', s, count=1)
+          s, code_count = re.subn(r"versionCode\s+\d+", "versionCode 75400", s, count=1)
+          s, name_count = re.subn(r"""versionName\s+["'][^"']+["']""", 'versionName "T102"', s, count=1)
           if code_count != 1 or name_count != 1:
               raise SystemExit('Could not set Android versionCode/versionName')
           p.write_text(s)
@@ -174,13 +174,13 @@ jobs:
           ACTUAL_CERT="$(printf '%s\n' "$SIGNER_OUTPUT" | sed -n 's/.*certificate SHA-256 digest: //p' | head -n 1 | tr -d ':' | tr '[:upper:]' '[:lower:]')"
           test -n "$ACTUAL_CERT" && test "$ACTUAL_CERT" = "$EXPECTED_CERT" || { echo "APK signer fingerprint does not match the fixed POINTS signing certificate"; exit 1; }
           mkdir -p release-assets
-          cp "$APK" release-assets/POINTS-T101.apk
+          cp "$APK" release-assets/POINTS-T102.apk
 
       - name: Publish APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: POINTS-T101-Android-APK
-          path: release-assets/POINTS-T101.apk
+          name: POINTS-T102-Android-APK
+          path: release-assets/POINTS-T102.apk
           if-no-files-found: error
           retention-days: 30
 
@@ -193,35 +193,35 @@ jobs:
       - name: Download APK artifact
         uses: actions/download-artifact@v4
         with:
-          name: POINTS-T101-Android-APK
+          name: POINTS-T102-Android-APK
           path: release-assets
 
-      - name: Replace previous T101 APK asset
+      - name: Replace previous T102 APK asset
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release delete-asset T101 POINTS-T101.apk --yes || true
+        run: gh release delete-asset T102 POINTS-T102.apk --yes || true
 
-      - name: Publish T101 release with APK
+      - name: Publish T102 release with APK
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: T101
-          name: POINTS T101
+          tag_name: T102
+          name: POINTS T102
           body: |
-            POINTS T101 正式版
+            POINTS T102 正式版
 
             - 保留总览主页四分之一圆形空间背景与多层景深，增强立体空间感
             - 优化主界面圆环层次、球体高光与移动端显示
             - 优化账号页登出按钮视觉层次与触控反馈
             - 明确退出云端账号不会删除本地积分数据，固定签名支持覆盖安装
-          files: release-assets/POINTS-T101.apk
+          files: release-assets/POINTS-T102.apk
           draft: false
           prerelease: false
           make_latest: true
 
-      - name: Explicitly mark T101 as the latest release
+      - name: Explicitly mark T102 as the latest release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          RELEASE_ID=$(gh release view T101 --repo kna58765-cpu/Points --json databaseId --jq '.databaseId')
+          RELEASE_ID=$(gh release view T102 --repo kna58765-cpu/Points --json databaseId --jq '.databaseId')
           gh api --method PATCH repos/kna58765-cpu/Points/releases/$RELEASE_ID -f make_latest=true
-          gh release view T101 --repo kna58765-cpu/Points
+          gh release view T102 --repo kna58765-cpu/Points
