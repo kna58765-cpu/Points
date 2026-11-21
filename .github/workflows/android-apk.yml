@@ -94,7 +94,7 @@ jobs:
                   raise SystemExit('Could not add debug build type')
           p.write_text(s)
           PY
-          keytool -list -v -keystore "$POINTS_KEYSTORE_PATH" -storepass "$POINTS_KEYSTORE_PASSWORD" -alias "$POINTS_KEY_ALIAS" | grep 'SHA256:'
+          keytool -list -v -keystore "$POINTS_KEYSTORE_PATH" -storepass "$POINTS_KEYSTORE_PASSWORD" -alias "$POINTS_KEY_ALIAS"
 
       - name: Set Android app version
         run: |
