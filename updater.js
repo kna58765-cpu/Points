@@ -2,10 +2,10 @@ import { FileTransfer } from '@capacitor/file-transfer';
 import { Filesystem, Directory } from '@capacitor/filesystem';
 import { FileOpener } from '@capacitor-community/file-opener';
 
-const APP_VERSION = 'T087';
+const APP_VERSION = 'T088';
 const REPOSITORY = 'kna58765-cpu/Points';
 const RELEASE_API = 'https://api.github.com/repos/' + REPOSITORY + '/releases/latest';
-const T087_NOTES = '• 生成邀请码后直接显示在按钮下方的独立卡片中\\n• 邀请码由 Supabase 云端生成，加入团队时由云端真实验证\\n• 支持复制邀请码，显示有效期和使用次数限制\\n• 保持原固定签名，支持覆盖安装并保留数据';
+const T088_NOTES = '• 修复手机端邀请码区域被横向 Flex 布局挤到屏幕外的问题\\n• 生成邀请码后在按钮正下方纵向显示独立卡片\\n• 邀请码由 Supabase 云端生成并验证，支持复制\\n• 版本号更新为 0.88.00，保持原固定签名';
 
 function versionNumber(value) {
   const match = String(value || '').match(/T?(\d+)/i);
@@ -78,7 +78,7 @@ export function consumeInstalledUpdate() {
   if (installed && installed !== APP_VERSION) {
     info = pending?.version === APP_VERSION
       ? pending
-      : { version: APP_VERSION, notes: T087_NOTES };
+      : { version: APP_VERSION, notes: T088_NOTES };
   }
 
   // A cancelled installation must not leave a stale "pending" success notice.
