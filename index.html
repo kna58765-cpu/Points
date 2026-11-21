@@ -699,8 +699,8 @@ downloadUpdate?.addEventListener('click',async()=>{
    bar.style.width=(progress.percent||0)+'%';label.textContent=progress.message||'正在下载官方 APK…';
    updateStatus.textContent=progress.message||'正在下载官方 APK…';
   });
-  updateStatus.textContent='APK 已下载并校验。请在 Android 系统安装界面确认安装，安装完成后重新打开 POINTS。';
-  downloadUpdate.textContent='等待系统安装确认';
+  updateStatus.textContent='APK 已下载并校验，已请求打开 Android 安装器。请在系统弹窗中确认安装；如果没有弹出安装界面，可以重新尝试。';
+  downloadUpdate.disabled=false;downloadUpdate.textContent='重新尝试安装';
  }catch(error){
   updateStatus.textContent=error.message||'APK 下载或安装启动失败，当前版本未受影响。';
   downloadUpdate.disabled=false;downloadUpdate.textContent='重新下载 APK';
