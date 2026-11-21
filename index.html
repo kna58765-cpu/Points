@@ -718,8 +718,8 @@ function showUpdateToast(info){
  if(!toast)return;
  document.getElementById('updateToastVersion').textContent='POINTS '+info.version+' 已成功安装';
  const notes=document.getElementById('updateToastNotes');
- const items=String(info.notes||'').trim().split(/\\r?\\n/).filter(Boolean).slice(0,6);
- notes.textContent=items.length?items.map(x=>x.replace(/^[-*•]\\s*/, '• ')).join('\\n'):'• 性能优化与问题修复';
+ const items=String(info.notes||'').trim().split(/\r?\n/).filter(Boolean).slice(0,6);
+ notes.textContent=items.length?items.map(x=>x.replace(/^[-*•]\s*/, '• ')).join('\n'):'• 性能优化与问题修复';
  toast.classList.remove('hide');
  toast.classList.add('show');
  let closeTimer=0;
