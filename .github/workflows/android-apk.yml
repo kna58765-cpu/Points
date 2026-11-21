@@ -57,8 +57,8 @@ jobs:
           import re
           p = Path('android/app/build.gradle')
           s = p.read_text()
-          s, code_count = re.subn(r'versionCode\s+\d+', 'versionCode 75076', s, count=1)
-          s, name_count = re.subn(r'versionName\s+[\'\"][^\'\"]+[\'\"]', 'versionName "T076"', s, count=1)
+          s, code_count = re.subn(r'versionCode\s+\d+', 'versionCode 75077', s, count=1)
+          s, name_count = re.subn(r'versionName\s+[\'\"][^\'\"]+[\'\"]', 'versionName "T077"', s, count=1)
           if code_count != 1 or name_count != 1:
               raise SystemExit('Could not set Android versionCode/versionName')
           p.write_text(s)
@@ -71,7 +71,7 @@ jobs:
       - name: Publish APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: POINTS-T076-Android-APK
+          name: POINTS-T077-Android-APK
           path: android/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
           retention-days: 30
@@ -88,13 +88,13 @@ jobs:
           name: POINTS-T076-Android-APK
           path: release-assets
 
-      - name: Publish T076 release with APK
+      - name: Publish T077 release with APK
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: T076
-          name: POINTS T076
+          tag_name: T077
+          name: POINTS T077
           body: |
-            POINTS T076 正式版
+            POINTS T077 正式版
 
             - 按键升级为流体玻璃质感
             - 底部导航支持横向滑动选择
