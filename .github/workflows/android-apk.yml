@@ -85,7 +85,7 @@ jobs:
       - name: Download APK artifact
         uses: actions/download-artifact@v4
         with:
-          name: POINTS-T076-Android-APK
+          name: POINTS-T077-Android-APK
           path: release-assets
 
       - name: Publish T077 release with APK
@@ -96,10 +96,10 @@ jobs:
           body: |
             POINTS T077 正式版
 
-            - 按键升级为流体玻璃质感
-            - 底部导航支持横向滑动选择
-            - 修复版本号识别逻辑
-            - 优化应用内更新体验并保留更新完成动画
+            - 页面布局更宽松，增加留白与行高
+            - 液态玻璃调整为柔和毛玻璃材质
+            - 优化窄屏文字显示，减少截断
+            - 重点验证 T076 应用内更新流程
           files: release-assets/app-debug.apk
           draft: false
           prerelease: false
