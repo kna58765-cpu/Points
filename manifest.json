@@ -3,8 +3,8 @@
   "short_name": "POINTS",
   "start_url": "./",
   "display": "standalone",
-  "background_color": "#f4f5f8",
-  "theme_color": "#f39a54",
+  "background_color": "#f2f4f7",
+  "theme_color": "#f2f4f7",
   "lang": "zh-CN",
   "icons": []
 }
