@@ -265,6 +265,70 @@ body.auth-required #authGate{display:flex;position:fixed;inset:0;z-index:100;bac
 .invite-code{margin-top:9px;padding:15px 12px;border:1px dashed #cfcfcf;border-radius:15px;background:#fff;text-align:center;font-size:clamp(24px,7vw,32px);font-weight:900;letter-spacing:3px;font-variant-numeric:tabular-nums;overflow-wrap:anywhere;user-select:all}
 .invite-meta{margin-top:9px;color:#888;font-size:12px;text-align:center}
 .invite-copy{width:100%;margin-top:13px;min-height:48px}
+
+
+/* T077: roomier layout and true frosted-glass surfaces */
+.app{padding:28px 26px calc(118px + env(safe-area-inset-bottom));}
+header{padding:16px 0 34px;}
+h1{line-height:1.22;margin:18px 0 10px;letter-spacing:-.7px;overflow-wrap:anywhere;}
+.sub{font-size:15px;line-height:1.7;}
+.hero{margin:30px 0 28px;padding:34px 32px;gap:22px;}
+.stats{gap:16px;margin-bottom:34px;}
+.stat{padding:23px 21px;}
+.stat label{line-height:1.6;font-size:13px;}
+.stat strong{line-height:1.25;margin-top:11px;overflow-wrap:anywhere;}
+.section-head{margin:34px 0 18px;gap:16px;}
+.section-head h2{line-height:1.4;}
+.members{gap:18px;}
+.member{padding:22px;}
+.member-name{line-height:1.5;overflow-wrap:anywhere;}
+.points{margin:22px 0 18px;line-height:1.2;}
+.actions{gap:12px;}
+.actions button{min-height:48px;padding:12px 10px;line-height:1.35;white-space:normal;}
+.rowline{padding:19px 21px;line-height:1.55;}
+.muted{line-height:1.6;}
+.panel{line-height:1.55;}
+.modal{padding:28px;line-height:1.6;}
+.field{min-height:50px;line-height:1.5;margin:10px 0 16px;}
+.modal-actions{gap:12px;margin-top:18px;}
+.modal-actions button{min-height:50px;line-height:1.35;white-space:normal;}
+#cloudAuth{line-height:1.65;}
+#cloudAuth button{line-height:1.4;white-space:normal;}
+.invite-card{padding:22px;margin-top:20px;}
+.invite-code{padding:19px 14px;line-height:1.5;letter-spacing:2px;}
+.invite-copy{min-height:52px;}
+nav{gap:14px;padding:16px 18px calc(16px + env(safe-area-inset-bottom));}
+nav button{padding:11px 16px;min-height:44px;line-height:1.35;}
+/* Frosted glass: translucent matte layer, restrained blur and soft edge. */
+:root{--frost-fill:rgba(248,248,248,.76);--frost-edge:rgba(255,255,255,.82);--frost-shadow:0 8px 26px rgba(0,0,0,.09),inset 0 1px 0 rgba(255,255,255,.82);}
+nav{background:var(--frost-fill)!important;border:1px solid var(--frost-edge)!important;border-bottom:0!important;box-shadow:var(--frost-shadow)!important;-webkit-backdrop-filter:blur(22px) saturate(1.15)!important;backdrop-filter:blur(22px) saturate(1.15)!important;}
+nav button{background:rgba(255,255,255,.48)!important;border:1px solid rgba(255,255,255,.7)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.8)!important;-webkit-backdrop-filter:blur(12px)!important;backdrop-filter:blur(12px)!important;}
+nav button.active{background:rgba(20,20,20,.94)!important;color:#fff!important;border-color:rgba(255,255,255,.22)!important;box-shadow:0 4px 12px rgba(0,0,0,.14)!important;}
+.control-menu,.modal{background:rgba(250,250,250,.88)!important;border:1px solid rgba(255,255,255,.9)!important;box-shadow:0 14px 38px rgba(0,0,0,.13),inset 0 1px 0 rgba(255,255,255,.9)!important;-webkit-backdrop-filter:blur(22px) saturate(1.12)!important;backdrop-filter:blur(22px) saturate(1.12)!important;}
+.control-select>button,.outline,.team,.ui-btn.secondary{background:rgba(255,255,255,.76)!important;border:1px solid rgba(225,225,225,.85)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.95),0 3px 10px rgba(0,0,0,.035)!important;-webkit-backdrop-filter:blur(14px)!important;backdrop-filter:blur(14px)!important;}
+.ui-btn.primary,.plain{background:#111!important;box-shadow:0 4px 12px rgba(0,0,0,.12)!important;}
+.control-select>button:before,.ui-btn:before,.outline:before,.team:before{display:none!important;}
+@media(max-width:600px){
+ .app{padding:20px 18px calc(112px + env(safe-area-inset-bottom));}
+ header{padding:12px 0 28px;}
+ h1{font-size:clamp(27px,7vw,36px);margin:16px 0 9px;line-height:1.25;}
+ .sub{font-size:14px;line-height:1.75;}
+ .hero{padding:27px 22px;margin:25px 0 24px;}
+ .stats{gap:10px;margin-bottom:29px;}
+ .stat{padding:17px 13px;}
+ .stat label{font-size:12px;line-height:1.55;}
+ .stat strong{font-size:clamp(18px,5.3vw,23px);line-height:1.3;}
+ .section-head{margin:30px 0 16px;}
+ .members{gap:14px;}
+ .member{padding:20px;}
+ .points{margin:20px 0 16px;}
+ .rowline{padding:17px 16px;}
+ .modal{padding:24px 21px;}
+ nav{gap:10px;padding:13px 14px calc(13px + env(safe-area-inset-bottom));}
+ nav button{padding:10px 13px;min-height:44px;}
+}
+@media(prefers-reduced-transparency:reduce){nav,.control-menu,.modal,.control-select>button{backdrop-filter:none!important;-webkit-backdrop-filter:none!important;background:#f4f4f4!important;}}
+
 </style></head>
 <body class="auth-required"><section id="authGate"><div class="auth-brand"><div class="auth-logo">P<span>.</span></div><div class="auth-wordmark">POINTS</div><p>每一分，都有迹可循。</p></div><div id="authGateSlot"></div><script>document.addEventListener("DOMContentLoaded",function(){var gate=document.getElementById("authGateSlot"),panel=document.getElementById("cloudAuth");if(gate&&panel)gate.appendChild(panel);});</script><div class="auth-foot">安全登录 · 团队协作 · 实时积分</div></section><main class="app">
 <header><div><div class="brand">POINTS<span> / SCORE</span></div><div class="app-version">T075</div></div><div class="sub">Supabase 云端同步 · T075</div></header>
