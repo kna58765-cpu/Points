@@ -73,14 +73,28 @@ jobs:
           raw = re.sub(r"^data:[^,]*,", "", raw, flags=re.I)
           raw = raw.replace("\\n", "").replace("\\r", "")
           cleaned = re.sub(r"[^A-Za-z0-9+/=_-]", "", raw).replace("-", "+").replace("_", "/")
+          # Remove any misplaced padding, then try the common copy/paste
+          # variants. A one-character remainder cannot be padded, so trim it.
           cleaned = cleaned.replace("=", "")
           if not cleaned:
               raise SystemExit("Keystore secret is empty after normalization")
-          cleaned += "=" * ((4 - len(cleaned) % 4) % 4)
-          try:
-              data = base64.b64decode(cleaned, validate=True)
-          except Exception:
-              raise SystemExit("Keystore secret cannot be decoded as Base64; check repository secret encoding")
+          candidates = [cleaned]
+          if len(cleaned) % 4 == 1:
+              candidates.append(cleaned[:-1])
+          if len(cleaned) % 4 == 2:
+              candidates.append(cleaned[:-2])
+          data = None
+          for candidate in candidates:
+              candidate += "=" * ((4 - len(candidate) % 4) % 4)
+              try:
+                  decoded = base64.b64decode(candidate, validate=False)
+                  if decoded:
+                      data = decoded
+                      break
+              except Exception:
+                  continue
+          if not data:
+              raise SystemExit("Base64 secret could not be decoded; regenerate Base64 from the original keystore")
           # If the first decode is still printable Base64, decode exactly one more time.
           text_data = data.decode("ascii", errors="ignore")
           compact = re.sub(r"\s+", "", text_data)
