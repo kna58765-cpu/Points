@@ -180,7 +180,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: POINTS-T092-Android-APK
-          path: release-assets/POINTS-T091.apk
+          path: release-assets/POINTS-T092.apk
           if-no-files-found: error
           retention-days: 30
 
@@ -193,35 +193,35 @@ jobs:
       - name: Download APK artifact
         uses: actions/download-artifact@v4
         with:
-          name: POINTS-T091-Android-APK
+          name: POINTS-T092-Android-APK
           path: release-assets
 
-      - name: Replace previous T091 APK asset
+      - name: Replace previous T092 APK asset
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release delete-asset T091 POINTS-T091.apk --yes || true
+        run: gh release delete-asset T092 POINTS-T092.apk --yes || true
 
-      - name: Publish T091 release with APK
+      - name: Publish T092 release with APK
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: T091
-          name: POINTS T091
+          tag_name: T092
+          name: POINTS T092
           body: |
-            POINTS T091 正式版
+            POINTS T092 正式版
 
             - 移除团队和邀请码功能，保留原有积分数据
             - 移除团队、邀请码和团队协作入口
             - 仅保留邮箱注册与邮箱登录，积分数据迁移为个人账号独立云同步
             - 保持原固定签名，支持覆盖安装并保留数据
-          files: release-assets/POINTS-T091.apk
+          files: release-assets/POINTS-T092.apk
           draft: false
           prerelease: false
           make_latest: true
 
-      - name: Explicitly mark T091 as the latest release
+      - name: Explicitly mark T092 as the latest release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          RELEASE_ID=$(gh release view T091 --repo kna58765-cpu/Points --json databaseId --jq '.databaseId')
+          RELEASE_ID=$(gh release view T092 --repo kna58765-cpu/Points --json databaseId --jq '.databaseId')
           gh api --method PATCH repos/kna58765-cpu/Points/releases/$RELEASE_ID -f make_latest=true
-          gh release view T091 --repo kna58765-cpu/Points
+          gh release view T092 --repo kna58765-cpu/Points
