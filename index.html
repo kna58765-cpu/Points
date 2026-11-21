@@ -84,7 +84,7 @@ nav button.active{background:#111;color:#fff}
  nav button{padding:8px 9px;font-size:11px}
 }
 
-/* T074 refined controls and native-dialog replacement */
+/* T075 refined controls and native-dialog replacement */
 .control-select{position:relative;min-width:128px}
 .control-select>button{width:100%;min-height:48px;padding:0 42px 0 16px;border:1px solid #e4e4e4;border-radius:16px;background:#fff;color:#171717;text-align:left;font-weight:600;position:relative;box-shadow:0 2px 8px #00000006}
 .control-select>button:after{content:"";position:absolute;right:17px;top:50%;width:8px;height:8px;border-right:1.8px solid #777;border-bottom:1.8px solid #777;transform:translateY(-70%) rotate(45deg)}
@@ -107,7 +107,7 @@ nav button.active{background:#111;color:#fff}
 @media(max-width:600px){.control-select{min-width:118px}.control-select>button{min-height:46px;border-radius:15px;padding-left:14px;font-size:14px}.control-menu{left:0;right:auto;width:100%;max-width:90vw}#bulkAddModal .modal{padding:22px}#bulkNames{min-height:155px}}
 
 
-/* T074 Liquid Glass finish: iOS-inspired translucent material */
+/* T075 Liquid Glass finish: iOS-inspired translucent material */
 :root{
  --glass-edge:rgba(255,255,255,.78);
  --glass-shadow:0 12px 34px rgba(20,20,20,.10),inset 0 1px 0 rgba(255,255,255,.9);
@@ -240,9 +240,20 @@ body.auth-required #authGate{display:flex;position:fixed;inset:0;z-index:100;bac
 #authGate #cloudInviteCode{font-size:16px}
 @media(max-width:420px){body.auth-required #authGate{padding:22px 16px}#authGate #cloudAuth{padding:21px!important;border-radius:24px}.auth-logo{font-size:52px}}
 
+
+/* T075 account, release updater and reusable post-update toast */
+#updateToast{position:fixed;z-index:80;left:50%;bottom:calc(82px + env(safe-area-inset-bottom));width:min(92vw,430px);padding:17px 18px 16px;border:1px solid rgba(255,255,255,.88);border-radius:23px;background:linear-gradient(145deg,rgba(255,255,255,.97),rgba(246,246,246,.94));box-shadow:0 18px 55px rgba(0,0,0,.22),inset 0 1px 0 #fff;backdrop-filter:blur(24px) saturate(1.5);-webkit-backdrop-filter:blur(24px) saturate(1.5);opacity:0;visibility:hidden;transform:translate(-50%,24px) scale(.96);pointer-events:none}
+#updateToast.show{visibility:visible;pointer-events:auto;animation:updateToastIn .48s cubic-bezier(.18,.85,.25,1) forwards}
+#updateToast.hide{animation:updateToastOut .32s ease forwards}
+@keyframes updateToastIn{to{opacity:1;transform:translate(-50%,0) scale(1)}}
+@keyframes updateToastOut{to{opacity:0;transform:translate(-50%,18px) scale(.97)}}
+.update-toast-head{display:flex;align-items:center;gap:11px}.update-toast-check{width:36px;height:36px;display:grid;place-items:center;border-radius:50%;background:#eaf6ef;color:#16834a;font-size:21px;font-weight:900}.update-toast-head>div{display:grid;gap:3px;flex:1}.update-toast-head b{font-size:17px}.update-toast-head small{font-size:11px;color:#888}.update-toast-head button{border:0;background:#f1f1f1;border-radius:50%;width:28px;height:28px;font-size:20px;color:#777}.update-toast-label{font-size:11px;font-weight:800;color:#999;letter-spacing:.8px;margin:13px 0 7px}#updateToastNotes{font-size:13px;line-height:1.6;color:#444;white-space:pre-wrap;max-height:112px;overflow:auto}
+#accountDelete{font-weight:750}.page-view[data-view="account"] .panel{box-shadow:0 3px 14px #00000004}
+@media(prefers-reduced-motion:reduce){#updateToast.show,#updateToast.hide{animation:none}#updateToast.show{opacity:1;visibility:visible;transform:translate(-50%,0)}}
+
 </style></head>
 <body class="auth-required"><section id="authGate"><div class="auth-brand"><div class="auth-logo">P<span>.</span></div><div class="auth-wordmark">POINTS</div><p>每一分，都有迹可循。</p></div><div id="authGateSlot"></div><script>document.addEventListener("DOMContentLoaded",function(){var gate=document.getElementById("authGateSlot"),panel=document.getElementById("cloudAuth");if(gate&&panel)gate.appendChild(panel);});</script><div class="auth-foot">安全登录 · 团队协作 · 实时积分</div></section><main class="app">
-<header><div><div class="brand">POINTS<span> / SCORE</span></div><div class="app-version">T074</div></div><div class="sub">Supabase 云端同步 · T074</div></header>
+<header><div><div class="brand">POINTS<span> / SCORE</span></div><div class="app-version">T075</div></div><div class="sub">Supabase 云端同步 · T075</div></header>
 <section class="panel" id="cloudAuth" style="padding:18px;margin:0 0 18px">
   <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
     <div><b>云端账号</b><div class="muted" id="cloudStatus">尚未登录 · 等待 Supabase 项目配置</div></div>
@@ -280,9 +291,34 @@ body.auth-required #authGate{display:flex;position:fixed;inset:0;z-index:100;bac
 <section class="page-view" data-view="members"><div class="section-head"><h2>成员积分</h2><div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end"><button class="outline" id="exportData">备份</button><button class="outline" id="importData">恢复</button><button class="outline" id="bulkAdd">批量添加</button><button class="outline" id="bulkAdjust">批量调分</button><button class="outline" id="bulkDelete">批量删除</button><button class="plain" id="addMember">＋ 添加成员</button></div></div><input id="importFile" type="file" accept="application/json,.json" class="hide"><div style="display:flex;gap:8px;align-items:center;margin-bottom:12px"><input id="memberSearch" class="field" style="margin:0;background:#fff;flex:1" placeholder="搜索成员名称…" autocomplete="off"><select class="outline" id="groupFilter"><option value="all">全部分组</option></select></div><section class="members" id="members"></section></section>
 <section class="page-view" data-view="history"><div class="section-head"><h2>积分流水</h2><select class="outline" id="historyFilter"><option value="all">全部时间</option><option value="today">今天</option><option value="7">近7天</option><option value="30">近30天</option></select></div><section class="panel" id="history"></section></section>
 <section class="page-view" data-view="team"><div class="section-head"><h2>我的团队</h2><span class="sub">TEAM / 邀请与同步</span></div><section class="panel" id="teamPagePanel"><div class="muted">团队管理、邀请码与云端同步</div></section></section>
+
+<section class="page-view" data-view="account">
+ <div class="section-head"><h2>账号</h2><span class="sub">ACCOUNT / 设置</span></div>
+ <section class="panel" style="padding:20px;margin-bottom:14px">
+  <div style="font-size:12px;color:#888;margin-bottom:8px">当前账号</div>
+  <div id="accountNickname" style="font-size:21px;font-weight:800">正在读取账号…</div>
+  <div class="muted" id="accountMethod">登录方式：读取中</div>
+ </section>
+ <section class="panel" style="padding:16px;margin-bottom:14px;display:grid;gap:10px">
+  <button class="outline ui-btn secondary" id="accountLogout" type="button">登出账号</button>
+  <button class="plain ui-btn primary" id="accountCheckUpdate" type="button">检查更新</button>
+  <div id="updateStatus" class="muted" role="status">点击检查更新，获取 POINTS 最新正式版本。</div>
+  <section id="updateResult" hidden style="border:1px solid #e8e8e8;border-radius:16px;padding:14px;background:#fafafa">
+   <div style="display:flex;justify-content:space-between;gap:10px;align-items:center"><b id="updateVersion">发现新版本</b><span class="muted" id="updateSize"></span></div>
+   <div id="updateNotes" style="white-space:pre-wrap;line-height:1.65;font-size:13px;color:#555;margin:10px 0"></div>
+   <button class="plain ui-btn primary" id="downloadUpdate" type="button" style="width:100%">下载并安装</button>
+  </section>
+ </section>
+ <section class="panel" style="padding:16px;border-color:#f1dada;margin-top:18px">
+  <div style="font-weight:750;color:#c62828;margin-bottom:7px">危险操作</div>
+  <div class="muted" style="margin-bottom:12px">注销账号会永久删除云端身份及关联数据，无法撤销。</div>
+  <button class="ui-btn danger" id="accountDelete" type="button" style="width:100%;background:#fff0f0;color:#c62828;border:1px solid #f1caca">注销账号</button>
+ </section>
+</section>
 <section class="page-view" data-view="audit"><div class="section-head"><h2>操作记录</h2><span class="sub">最近 50 条</span></div><section class="panel" id="auditHistory"></section></section>
 </main>
-<nav id="mainNav"><button class="active" type="button" data-page="overview">◉ 总览</button><button type="button" data-page="rank">▤ 排行</button><button type="button" data-page="members">♙ 成员</button><button type="button" data-page="history">≡ 流水</button><button type="button" data-page="audit">≡ 操作</button><button type="button" data-page="team">♧ 团队</button></nav>
+<nav id="mainNav"><button class="active" type="button" data-page="overview">◉ 总览</button><button type="button" data-page="rank">▤ 排行</button><button type="button" data-page="members">♙ 成员</button><button type="button" data-page="history">≡ 流水</button><button type="button" data-page="audit">≡ 操作</button><button type="button" data-page="team">♧ 团队</button><button type="button" data-page="account">◎ 账号</button></nav>
+<aside id="updateToast" aria-live="polite" aria-atomic="true"><div class="update-toast-head"><span class="update-toast-check">✓</span><div><b>更新完成</b><small id="updateToastVersion">POINTS T075 已成功安装</small></div><button type="button" id="updateToastClose" aria-label="关闭">×</button></div><div class="update-toast-label">本次更新内容</div><div id="updateToastNotes"></div></aside>
 <div class="modal-bg" id="modal"><div class="modal"><h3 id="modalTitle">添加成员</h3><label class="sub">成员名称</label><input class="field" id="nameInput" maxlength="24" placeholder="输入成员名称"><label class="sub" id="groupLabel">所属分组</label><input class="field" id="groupInput" maxlength="20" placeholder="例如：一班、二班、管理员组"><label class="sub hide" id="colorLabel">头像颜色</label><select class="field hide" id="colorInput"><option value="#111111">黑色</option><option value="#555555">深灰</option><option value="#777777">灰色</option><option value="#9a9a9a">浅灰</option><option value="#333333">炭黑</option></select><label class="sub" id="amountLabel">积分数值</label><input class="field" id="amountInput" type="number" min="1" max="99999" placeholder="例如 10"><label class="sub hide" id="noteLabel">备注（选填）</label><input class="field hide" id="noteInput" maxlength="80" placeholder="例如：完成任务、迟到"><div class="modal-actions"><button class="outline" id="deleteMember" style="display:none">删除成员</button><button class="outline" id="cancel">取消</button><button class="plain" id="confirm">确认</button></div></div></div>
 <div class="modal-bg" id="detailModal"><div class="modal" style="max-height:85dvh;overflow:auto"><div style="display:flex;justify-content:space-between"><h3 id="detailName">成员详情</h3><button class="outline" id="closeDetail">关闭</button></div><div class="hero" style="margin:8px 0 14px;padding:20px"><div><small>MEMBER TOTAL POINTS</small><div class="total" id="detailPoints">0</div></div></div><div class="stats"><div class="stat"><label>累计加分</label><strong id="detailEarned">0</strong></div><div class="stat"><label>累计扣分</label><strong id="detailSpent">0</strong></div><div class="stat"><label>记录次数</label><strong id="detailCount">0</strong></div></div><div class="section-head"><h2>全部积分记录</h2></div><section class="panel" id="detailHistory"></section></div></div><script>
 const KEY='points-v1';let data=JSON.parse(localStorage.getItem(KEY)||'null')||{members:[],logs:[]};data.settings=Object.assign({maxAdd:99999,maxDeduct:99999},data.settings||{});data.audit=Array.isArray(data.audit)?data.audit:[];let mode='member',target=null;let adminMode=true;
@@ -350,6 +386,27 @@ const emailEl=document.getElementById('cloudEmail');
 const passwordEl=document.getElementById('cloudPassword');
 const authGateSlot=document.getElementById('authGateSlot');
 const cloudAuthPanel=document.getElementById('cloudAuth');
+
+const accountNickname=document.getElementById('accountNickname');
+const accountMethod=document.getElementById('accountMethod');
+const accountLogoutButton=document.getElementById('accountLogout');
+const accountDeleteButton=document.getElementById('accountDelete');
+const accountCheckUpdate=document.getElementById('accountCheckUpdate');
+const updateStatus=document.getElementById('updateStatus');
+const updateResult=document.getElementById('updateResult');
+const updateVersion=document.getElementById('updateVersion');
+const updateSize=document.getElementById('updateSize');
+const updateNotes=document.getElementById('updateNotes');
+const downloadUpdate=document.getElementById('downloadUpdate');
+let availableUpdate=null;
+let updater=null;
+try{updater=await import('./updater.js')}catch(e){console.error('Updater unavailable',e)}
+function updateAccountIdentity(user){
+ if(!accountNickname||!accountMethod)return;
+ accountNickname.textContent=user?.user_metadata?.nickname||user?.email||'未登录';
+ accountMethod.textContent='登录方式：'+(user?.is_anonymous?'邀请码 / 匿名账号':user?.email?'邮箱账号':'未登录');
+}
+
 authGateSlot.appendChild(cloudAuthPanel);
 const authTitle=document.createElement('div');
 authTitle.className='auth-title';authTitle.textContent='欢迎加入 POINTS';
@@ -414,7 +471,7 @@ authSwitch.addEventListener('click',()=>{
 
 let cloudApi=null;
 function showMessage(message,isError=false){messageEl.textContent=message;messageEl.style.color=isError?'#d93636':'#777'}
-function showUser(user){statusEl.textContent=user?('已登录：'+(user.user_metadata?.nickname||user.email)):'尚未登录';formEl.hidden=!!user;logoutEl.hidden=!user}
+function showUser(user){statusEl.textContent=user?('已登录：'+(user.user_metadata?.nickname||user.email||'受邀成员')):'尚未登录';formEl.hidden=!!user;logoutEl.hidden=!user;updateAccountIdentity(user)}
 function errorText(error){
  const message=String(error?.message||'');
  if(/Invalid login credentials/i.test(message))return '邮箱或密码不正确，请检查后重试。';
@@ -516,8 +573,35 @@ async function initializeCloudUser(user){
  }catch(e){setTeamStatus('云端团队读取失败：'+errorText(e))}
  updateGate();
 }
+
 await initializeCloudUser(bootUser);
 updateGate();
+accountLogoutButton?.addEventListener('click',()=>logoutEl.click());
+accountDeleteButton?.addEventListener('click',async()=>{
+ if(!bootUser)return showMessage('请先登录账号。',true);
+ if(!confirm('确定注销 POINTS 账号吗？此操作不可撤销，云端账号及关联数据将被永久删除。'))return;
+ showMessage('注销服务需要先部署安全云端接口；当前版本暂未开放实际删除，账号数据不会被改动。',true);
+});
+accountCheckUpdate?.addEventListener('click',async()=>{
+ if(!updater)return showMessage('更新模块加载失败，请检查网络后重试。',true);
+ accountCheckUpdate.disabled=true;accountCheckUpdate.textContent='正在检查…';updateResult.hidden=true;updateStatus.textContent='正在查询 GitHub 最新正式版本…';
+ try{
+  const result=await updater.checkForUpdate();
+  if(!result.updateAvailable){updateStatus.textContent='当前已是最新正式版本（'+result.currentVersion+'）。';return}
+  availableUpdate=result;updateVersion.textContent='发现新版本 '+result.version;
+  updateSize.textContent=result.sizeText;updateNotes.textContent=result.notes||'本次更新暂无文字说明。';
+  updateResult.hidden=false;updateStatus.textContent='已找到官方正式版本，可以下载安装。';
+ }catch(error){updateStatus.textContent=error.message||'检查更新失败，请稍后重试。'}
+ finally{accountCheckUpdate.disabled=false;accountCheckUpdate.textContent='检查更新'}
+});
+downloadUpdate?.addEventListener('click',async()=>{
+ if(!availableUpdate||!updater)return;
+ downloadUpdate.disabled=true;downloadUpdate.textContent='正在打开下载…';
+ try{await updater.downloadUpdate(availableUpdate);updateStatus.textContent='已打开官方 APK 下载页面。下载完成后，请在系统提示中确认安装并重新打开 POINTS。'}
+ catch(error){updateStatus.textContent=error.message||'无法打开下载链接。'}
+ finally{downloadUpdate.disabled=false;downloadUpdate.textContent='下载并安装'}
+});
+
 createTeamBtn.addEventListener('click',async()=>{
  if(!cloudApi?.cloudReady||!activeUserId)return showMessage('请先登录云端账号。',true);
  const name=prompt('请输入团队名称');if(!name?.trim())return;
@@ -587,6 +671,23 @@ document.getElementById('cloudRegister').addEventListener('click',async()=>{
  try{await cloudApi.register(email,password,name);const user=await cloudApi.currentUser();showUser(user);await initializeCloudUser(user);updateGate();showMessage(user?'账号注册成功，请创建团队或加入团队。':'注册成功，请检查邮箱确认链接。');passwordEl.value=''}
  catch(error){showMessage(errorText(error),true)}
 });
+
+function showUpdateToast(info){
+ const toast=document.getElementById('updateToast');if(!toast)return;
+ document.getElementById('updateToastVersion').textContent='POINTS '+info.version+' 已成功安装';
+ const notes=document.getElementById('updateToastNotes');
+ const items=String(info.notes||'').trim().split(/\r?\n/).filter(Boolean).slice(0,6);
+ notes.textContent=items.length?items.map(x=>x.replace(/^[-*•]\s*/, '• ')).join('\n'):'• 性能优化与问题修复';
+ toast.classList.remove('hide');toast.classList.add('show');
+ const close=()=>{toast.classList.remove('show');toast.classList.add('hide')};
+ document.getElementById('updateToastClose').onclick=close;
+ setTimeout(close,5000);
+}
+try{
+ const updateInfo=updater?.consumeInstalledUpdate();
+ if(updateInfo)requestAnimationFrame(()=>showUpdateToast(updateInfo));
+}catch(e){console.warn('Update toast skipped',e)}
+
 logoutEl.addEventListener('click',async()=>{
  try{await cloudApi.logout();showUser(null);activeTeamId='';await initializeCloudUser(null);updateGate();if(unsubscribeState){unsubscribeState();unsubscribeState=null}activeTeamId='';localStorage.removeItem('points-cloud-team');inviteBtn.hidden=true;showMessage('已退出登录。当前设备积分仍保存在本地。')}
  catch(error){showMessage(errorText(error),true)}
