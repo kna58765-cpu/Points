@@ -68,7 +68,7 @@ jobs:
           raw = os.environ["POINTS_KEYSTORE_BASE64"]
           # GitHub secret may contain wrapped, quoted, URL-safe, or accidentally
           # double-Base64-encoded data. Normalize without ever printing it.
-          raw = raw.lstrip("\\ufeff").strip().strip("\\\"'")
+          raw = raw.lstrip("\ufeff").strip().strip("\\\"'")
           cleaned = re.sub(r"[^A-Za-z0-9+/=_-]", "", raw).replace("-", "+").replace("_", "/").rstrip("=")
           cleaned += "=" * ((4 - len(cleaned) % 4) % 4)
           try:
@@ -77,7 +77,7 @@ jobs:
               raise SystemExit("Keystore secret is not valid Base64; replace it with Base64 of the original signing file")
           # If the first decode is still printable Base64, decode exactly one more time.
           text_data = data.decode("ascii", errors="ignore")
-          compact = re.sub(r"\\s+", "", text_data)
+          compact = re.sub(r"\s+", "", text_data)
           if len(compact) > 100 and re.fullmatch(r"[A-Za-z0-9+/=_-]+", compact):
               try:
                   second = base64.b64decode(compact.replace("-", "+").replace("_", "/"), validate=False)
@@ -90,7 +90,7 @@ jobs:
           # Report only the file format, never key or password contents.
           if data.startswith(bytes.fromhex("feedfeed")):
               store_type = "JKS"
-          elif data.startswith(b"\\x30"):
+          elif data.startswith(bytes.fromhex("30")):
               store_type = "PKCS12"
           else:
               raise SystemExit("Decoded secret is not a JKS/PKCS12 keystore. Re-encode the original .jks/.p12 file as Base64 and update POINTS_KEYSTORE_BASE64.")
