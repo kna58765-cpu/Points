@@ -427,7 +427,20 @@ async function initializeCloudUser(user){
  activeUserId=user?.id||'';
  teamControls.hidden=!user;
  if(!user){updateGate();return}
- if(activeTeamId){try{await activateTeam(activeTeamId,true)}catch(e){setTeamStatus('团队连接失败：'+errorText(e))}}
+ try{
+  // Discover the user's cloud memberships so login/reinstall restores cloud data.
+  const teams=await cloudApi.listMyTeams();
+  const savedTeam=localStorage.getItem('points-cloud-team')||'';
+  const membership=teams.find(item=>item.team_id===savedTeam)||teams[0];
+  if(membership?.team_id){
+   await activateTeam(membership.team_id,true);
+  }else{
+   activeTeamId='';
+   localStorage.removeItem('points-cloud-team');
+   inviteBtn.hidden=true;
+   setTeamStatus('账号已登录 · 请创建团队或输入邀请码');
+  }
+ }catch(e){setTeamStatus('云端团队读取失败：'+errorText(e))}
  updateGate();
 }
 await initializeCloudUser(bootUser);
