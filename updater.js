@@ -2,10 +2,10 @@ import { FileTransfer } from '@capacitor/file-transfer';
 import { Filesystem, Directory } from '@capacitor/filesystem';
 import { FileOpener } from '@capacitor-community/file-opener';
 
-const APP_VERSION = 'T075';
+const APP_VERSION = 'T076';
 const REPOSITORY = 'kna58765-cpu/Points';
 const RELEASE_API = 'https://api.github.com/repos/' + REPOSITORY + '/releases/latest';
-const T075_NOTES = '• 新增独立账号页面\n• 新增 GitHub 正式版手动检查更新\n• 新增 APK 应用内下载\n• 新增底部弹出的更新完成动画\n• 优化账号信息与页面体验';
+const T076_NOTES = '• 新增独立账号页面\n• 新增 GitHub 正式版手动检查更新\n• 新增 APK 应用内下载\n• 新增底部弹出的更新完成动画\n• 优化账号信息与页面体验';
 
 function versionNumber(value) {
   const match = String(value || '').match(/T?(\\d+)/i);
@@ -66,7 +66,7 @@ export function consumeInstalledUpdate() {
   const installed = localStorage.getItem('points.installedVersion') || '';
   let info = null;
   if (pending?.version === APP_VERSION) info = pending;
-  else if (!installed && APP_VERSION === 'T075') info = { version: APP_VERSION, notes: T075_NOTES };
+  else if (!installed && APP_VERSION === 'T076') info = { version: APP_VERSION, notes: T075_NOTES };
   else if (installed && installed !== APP_VERSION) info = { version: APP_VERSION, notes: T075_NOTES };
   localStorage.removeItem('points.pendingUpdate');
   localStorage.setItem('points.installedVersion', APP_VERSION);
