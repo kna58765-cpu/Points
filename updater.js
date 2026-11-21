@@ -2,10 +2,10 @@ import { FileTransfer } from '@capacitor/file-transfer';
 import { Filesystem, Directory } from '@capacitor/filesystem';
 import { FileOpener } from '@capacitor-community/file-opener';
 
-const APP_VERSION = 'T082';
+const APP_VERSION = 'T083';
 const REPOSITORY = 'kna58765-cpu/Points';
 const RELEASE_API = 'https://api.github.com/repos/' + REPOSITORY + '/releases/latest';
-const T082_NOTES = '• 应用内版本号与正式 APK 统一为 T082\n• 修复团队邀请码生成后不可见的问题，支持直接复制分享\n• 修复手动检查更新与安装状态提示\n• 保持原固定签名，覆盖安装并保留数据';
+const T083_NOTES = '• 应用内版本号与正式 APK 统一为 T082\n• 修复团队邀请码生成后不可见的问题，支持直接复制分享\n• 修复手动检查更新与安装状态提示\n• 保持原固定签名，覆盖安装并保留数据';
 
 function versionNumber(value) {
   const match = String(value || '').match(/T?(\d+)/i);
